@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.views.decorators.csrf import csrf_exempt
+
+from issuer.views import PersonView, CredentialView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^add_or_update_person/', csrf_exempt(PersonView.as_view())),
+    url(r'^add_credential/', csrf_exempt(CredentialView.as_view()))
 ]
