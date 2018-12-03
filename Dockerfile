@@ -10,3 +10,4 @@ RUN pip install .
 WORKDIR /code/cert-tools
 RUN pip install .
 WORKDIR /code
+CMD ["sh", "run.sh"]
