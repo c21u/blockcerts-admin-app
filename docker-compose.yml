@@ -1,14 +1,14 @@
 version: '3'
 
 services:
-  db:
-    image: postgres
-    volumes:
-    - postgres_data:/var/lib/postgresql/data/
-    environment:
-        POSTGRES_USER: admin
-        POSTGRES_PASSWORD: c21u_admin_cert_access
-        POSTGRES_DB: certs
+#  db:
+#    image: postgres
+#    volumes:
+#    - postgres_data:/var/lib/postgresql/data/
+#    environment:
+#        POSTGRES_USER: admin
+#        POSTGRES_PASSWORD: c21u_admin_cert_access
+#        POSTGRES_DB: certs
   web:
     build: .
     command: sh /code/run.sh
@@ -16,8 +16,8 @@ services:
       - .:/code
     ports:
       - "8000:8000"
-    depends_on:
-      - db
+#    depends_on:
+#      - db
 
-volumes:
-  postgres_data:
+#volumes:
+#  postgres_data:
