@@ -1,0 +1,23 @@
+{% extends 'header.html' %}
+{% load bootstrap4 %}       {# import bootstrap4/bootstrap3 #}
+{% bootstrap_css %}         {# Embed Bootstrap CSS #}
+{% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
+{{ form.media }}
+{% block body_block %}
+    <div class="row">
+        <div class='col-sm-6'>
+            <form action="" method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Submit
+                    </button>
+                {% endbuttons %}
+            </form>
+        </div>
+    </div>
+    {% if issuance_url %}
+        <p>URL to register people for this issuance is: {{ issuance_url }}</p>
+    {% endif %}
+{% endblock %}
