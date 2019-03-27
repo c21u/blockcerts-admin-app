@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.db.models.base import ObjectDoesNotExist
+from django.http import QueryDict
 
 from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
@@ -13,6 +14,7 @@ from cert_mailer import introduce
 from string import Template
 from cert_tools.create_v2_certificate_template import create_certificate_template
 from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsigned_certificates_from_roster
+from urllib.parse import unquote
 import ast
 import os
 import urllib
@@ -35,34 +37,41 @@ class PersonView(View):
         person_form = PersonForm()
         return render(request, 'add_person.html', {'form':person_form, 'person_added':False})
 
-    def post(self, request, issuance_id=None):
+    def put(self, request, issuance_id=None):
         # person_data = json.loads(request.body.decode('utf-8'))
-        person_form = PersonForm(request.POST)
-        if person_form.is_valid():
-            person_data = {}
-            person_data['first_name'] = person_form.cleaned_data['first_name']
-            person_data['last_name'] = person_form.cleaned_data['last_name']
-            person_data['email'] = person_form.cleaned_data['email']
-            if not Person.objects.filter(email=person_data['email']).exists():
-                person = self.add_new_person(person_data)
-                mailer_config_data = CertMailerConfig.objects.all().first()
-                mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
-                person = {'first_name':person.first_name, 'email':person.email, 'nonce':person.nonce}
-                introduce.send_email(mailer_config, person)
-                # return HttpResponse('Created new person')
-            else:
-                person = Person.objects.get(email=person_data['email'])
-            person_issuance, created = PersonIssuances.objects.get_or_create(
-                person=person,
-                issuance=Issuance.objects.get(id=issuance_id)
-            )
-            person_form = PersonForm()
-            return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
+        put = QueryDict(request.body)
+        # if person_form.is_valid():
+        person_data = {}
+        # issuance_id = int(issuance_id)
 
-    # def post(self, request, issuance_id=None):
-    #     person_data = json.loads(request.body.decode('utf-8'))
-    #     self.update_person(person_data)
-    #     return HttpResponse('Added public address')
+        # person_data['first_name'] = person_form.cleaned_data['first_name']
+        # person_data['last_name'] = person_form.cleaned_data['last_name']
+        # person_data['email'] = person_form.cleaned_data['email']
+        person_data['first_name'] = unquote(put.get('first_name'))
+        person_data['last_name'] = unquote(put.get('last_name'))
+        person_data['email'] = unquote(put.get('email'))
+        if not Person.objects.filter(email=person_data['email']).exists():
+            person = self.add_new_person(person_data)
+            mailer_config_data = CertMailerConfig.objects.all().first()
+            mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
+            person_email = {'first_name':person.first_name, 'email':person.email, 'nonce':person.nonce}
+            introduce.send_email(mailer_config, person_email)
+            # return HttpResponse('Created new person')
+        else:
+            person = Person.objects.get(email=person_data['email'])
+        issuance = Issuance.objects.get(id=int(issuance_id))
+        person_issuance, created = PersonIssuances.objects.get_or_create(
+            person=person,
+            issuance=issuance
+        )
+        # person_form = PersonForm()
+            # return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
+        return JsonResponse({"success":"Person Added"})
+
+    def post(self, request, issuance_id=None):
+        person_data = json.loads(request.body.decode('utf-8'))
+        self.update_person(person_data)
+        return HttpResponse('Added public address')
 
     def add_new_person(self, person):
         nonce = uuid.uuid4().hex[:6].upper()

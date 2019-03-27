@@ -5,9 +5,5 @@ WORKDIR /code
 ADD requirements.txt /code/
 RUN pip install -r requirements.txt
 ADD . /code/
-WORKDIR /code/cert-mailer
-RUN pip install .
-WORKDIR /code/cert-tools
-RUN pip install .
 WORKDIR /code
 CMD ["sh", "run.sh"]

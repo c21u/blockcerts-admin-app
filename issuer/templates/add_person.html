@@ -8,7 +8,7 @@
     {% else %}
         <div class="row">
             <div class='col-sm-6'>
-                <form action="" method="post">
+                <form id="person-form">
                     {% csrf_token %}
                     {% bootstrap_form form %}
                     {% buttons %}
@@ -20,4 +20,29 @@
             </div>
         </div>
     {% endif %}
+    <script>
+        $('#person-form').on('submit', function(event){
+            event.stopPropogation();
+            var url = window.location.href
+            $.ajax({
+                url : url,
+                type : "PUT",
+                data : {
+                    first_name : $('#first_name').val(),
+                    last_name : $('#last_name').val(),
+                    email : $('#email').val()
+                 },
+
+                success : function(json) {
+                    window.location.replace(url);
+                    console.log(json);
+                    console.log("success");
+                },
+
+                error : function(xhr,errmsg,err) {
+                    console.log("error");
+                }
+            });
+        });
+    </script>
 {% endblock %}
