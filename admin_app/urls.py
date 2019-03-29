@@ -17,12 +17,13 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
 
-from issuer.views import PersonView, CredentialView, IssuanceView, UnsignedCertificatesView
+from issuer.views import PersonView, CredentialView, IssuanceView, UnsignedCertificatesView, ThankYouView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^(?P<issuance_id>\d+)/add_or_update_person/', csrf_exempt(PersonView.as_view())),
     url(r'^add_credential/', csrf_exempt(CredentialView.as_view())),
     url(r'^add_issuance/', csrf_exempt(IssuanceView.as_view())),
-    url(r'^unsigned_certificates/', csrf_exempt(UnsignedCertificatesView.as_view()))
+    url(r'^unsigned_certificates/', csrf_exempt(UnsignedCertificatesView.as_view())),
+    url(r'^thankyou/', ThankYouView.as_view())
 ]

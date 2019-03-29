@@ -50,11 +50,13 @@ class PersonView(View):
         person_data['first_name'] = unquote(put.get('first_name'))
         person_data['last_name'] = unquote(put.get('last_name'))
         person_data['email'] = unquote(put.get('email'))
+        print("HI")
         if not Person.objects.filter(email=person_data['email']).exists():
             person = self.add_new_person(person_data)
             mailer_config_data = CertMailerConfig.objects.all().first()
             mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
             person_email = {'first_name':person.first_name, 'email':person.email, 'nonce':person.nonce}
+            print("YOHO")
             introduce.send_email(mailer_config, person_email)
             # return HttpResponse('Created new person')
         else:
@@ -192,3 +194,8 @@ class UnsignedCertificatesView(View):
                 person_issuance.save()
                 print("Save")
         return HttpResponse("DONE")
+
+
+class ThankYouView(View):
+    def get(self, request):
+        return render(request, 'thankyou.html')

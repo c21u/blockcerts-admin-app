@@ -22,8 +22,9 @@
     {% endif %}
     <script>
         $('#person-form').on('submit', function(event){
-            event.stopPropogation();
-            var url = window.location.href
+            var url = window.location.href;
+            var getUrl = window.location;
+            var baseUrl = getUrl .protocol + "//" + getUrl.host + "/";
             $.ajax({
                 url : url,
                 type : "PUT",
@@ -34,7 +35,7 @@
                  },
 
                 success : function(json) {
-                    window.location.replace(url);
+                    window.location.replace(baseUrl + 'thankyou/');
                     console.log(json);
                     console.log("success");
                 },

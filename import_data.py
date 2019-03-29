@@ -28,6 +28,8 @@ def populate_persons():
                         seen_public_addresses.add(row[4])
             except sqlite3.IntegrityError as s:
                 pass
+            except IndexError as i:
+                pass
 
 
 if __name__ == '__main__':

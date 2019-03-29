@@ -45,7 +45,6 @@ def push_cert_tools_config():
     args.abs_data_dir = os.path.abspath(os.path.join(cwd, args.data_dir))
 
     args, _ = p.parse_known_args()
-    print(args.additional_global_fields)
     args.abs_data_dir = os.path.abspath(os.path.join(cwd, args.data_dir))
     args_s = json.dumps(args.__dict__)
     _ = CertToolsConfig.objects.all().delete()
