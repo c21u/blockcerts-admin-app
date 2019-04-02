@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'qrp(xkfh24l&*gjjqn4x)cm0pol)u^q=+a+&#m29u@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = [os.getenv('HOSTNAME', '0.0.0.0')]
 
 
 # Application definition
@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrap4',
+    'bootstrap_datepicker_plus',
     'issuer'
 ]
 
