@@ -18,6 +18,8 @@ from urllib.parse import unquote
 import ast
 import os
 import urllib
+from datetime import datetime
+
 def recursive_namespace_to_dict(obj):
     if isinstance(obj, list):
         for i in range(len(obj)):
@@ -32,48 +34,43 @@ def recursive_namespace_to_dict(obj):
 # Create your views here.
 
 
-class PersonView(View):
+class AddPersonView(View):
     def get(self, request, issuance_id=None):
         person_form = PersonForm()
         return render(request, 'add_person.html', {'form':person_form, 'person_added':False})
 
-    def put(self, request, issuance_id=None):
-        # person_data = json.loads(request.body.decode('utf-8'))
-        put = QueryDict(request.body)
-        # if person_form.is_valid():
-        person_data = {}
-        # issuance_id = int(issuance_id)
-
-        # person_data['first_name'] = person_form.cleaned_data['first_name']
-        # person_data['last_name'] = person_form.cleaned_data['last_name']
-        # person_data['email'] = person_form.cleaned_data['email']
-        person_data['first_name'] = unquote(put.get('first_name'))
-        person_data['last_name'] = unquote(put.get('last_name'))
-        person_data['email'] = unquote(put.get('email'))
-        print("HI")
-        if not Person.objects.filter(email=person_data['email']).exists():
-            person = self.add_new_person(person_data)
-            mailer_config_data = CertMailerConfig.objects.all().first()
-            mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
-            person_email = {'first_name':person.first_name, 'email':person.email, 'nonce':person.nonce}
-            print("YOHO")
-            introduce.send_email(mailer_config, person_email)
-            # return HttpResponse('Created new person')
-        else:
-            person = Person.objects.get(email=person_data['email'])
-        issuance = Issuance.objects.get(id=int(issuance_id))
-        person_issuance, created = PersonIssuances.objects.get_or_create(
-            person=person,
-            issuance=issuance
-        )
-        # person_form = PersonForm()
-            # return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
-        return JsonResponse({"success":"Person Added"})
-
     def post(self, request, issuance_id=None):
-        person_data = json.loads(request.body.decode('utf-8'))
-        self.update_person(person_data)
-        return HttpResponse('Added public address')
+        # person_data = json.loads(request.body.decode('utf-8'))
+        # put = QueryDict(request.body)
+        person_form = PersonForm(request.POST)
+        if person_form.is_valid():
+            person_data = {}
+            # issuance_id = int(issuance_id)
+            issuance = Issuance.objects.get(id=int(issuance_id))
+            credential = issuance.credential
+            person_data['first_name'] = person_form.cleaned_data['first_name']
+            person_data['last_name'] = person_form.cleaned_data['last_name']
+            person_data['email'] = person_form.cleaned_data['email']
+            # person_data['first_name'] = unquote(put.get('first_name'))
+            # person_data['last_name'] = unquote(put.get('last_name'))
+            # person_data['email'] = unquote(put.get('email'))
+            if not Person.objects.filter(email=person_data['email']).exists():
+                person = self.add_new_person(person_data)
+                mailer_config_data = CertMailerConfig.objects.all().first()
+                mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
+                person_email = {'first_name':person.first_name, 'email':person.email, 'nonce':person.nonce, 'title':credential.title}
+                introduce.send_email(mailer_config, person_email)
+                # return HttpResponse('Created new person')
+            else:
+                person = Person.objects.get(email=person_data['email'])
+            issuance = Issuance.objects.get(id=int(issuance_id))
+            person_issuance, created = PersonIssuances.objects.get_or_create(
+                person=person,
+                issuance=issuance
+            )
+            person_form = PersonForm()
+            return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
+        # return JsonResponse({"success":"Person Added"})
 
     def add_new_person(self, person):
         nonce = uuid.uuid4().hex[:6].upper()
@@ -88,9 +85,14 @@ class PersonView(View):
         return person
 
 
+class UpdatePersonView(View):
+    def post(self, request):
+        person_data = json.loads(request.body.decode('utf-8'))
+        self.update_person(person_data)
+        return HttpResponse('Added public address')
+
     def update_person(self, person):
         Person.objects.filter(nonce=person['nonce']).update(public_address=person['public_address'])
-
 
 class CredentialView(View):
     def get(self, request):
@@ -131,33 +133,33 @@ class IssuanceView(View):
         # issuance_data = json.loads(request.body.decode('utf-8'))
         # issuance_id = self.add_issuance(issuance_data)
         # return JsonResponse({'issuance_link':issuance_id})
-        issuance_form = IssuanceForm(request.POST)
-        if issuance_form.is_valid():
-            issuance_data = {}
-            issuance_data['credential_id'] = int(issuance_form.cleaned_data['credential'][0])
-            issuance_data['date_issue'] = issuance_form.cleaned_data['date_issue']
-            issuance = self.add_issuance(issuance_data)
-            issuance_url = 'http://0.0.0.0:8000/' + str(issuance.id) + '/add_or_update_person/'
-            linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
+        # if issuance_form.is_valid():
+        issuance_data = {}
+        issuance_post = request.POST
+        issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
+        issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
+        issuance = self.add_issuance(issuance_data)
+        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.id) + '/add_person/'
+        linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
-            substitutions = {'title':linked_credential.title, 'narrative':linked_credential.narrative,
-                             'issuing_department':linked_credential.issuing_department, 'date_issue':issuance.date_issue.strftime("%b %d, %Y")}
-            cert_tools_config_data = CertToolsConfig.objects.all().first()
-            cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
-            cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
-            # for i in range(len(cert_tools_config.additional_global_fields)):
-            #     cert_tools_config.additional_global_fields[i] = cert_tools_config.additional_global_fields[i].__dict__
-            recursive_namespace_to_dict(cert_tools_config.additional_global_fields)
+        substitutions = {'title':linked_credential.title, 'narrative':linked_credential.narrative,
+                         'issuing_department':linked_credential.issuing_department, 'date_issue':issuance.date_issue.strftime("%b %d, %Y")}
+        cert_tools_config_data = CertToolsConfig.objects.all().first()
+        cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
+        cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
+        # for i in range(len(cert_tools_config.additional_global_fields)):
+        #     cert_tools_config.additional_global_fields[i] = cert_tools_config.additional_global_fields[i].__dict__
+        recursive_namespace_to_dict(cert_tools_config.additional_global_fields)
 
-            # cert_tools_config.certificate_description = Template(cert_tools_config.certificate_description).safe_substitute(substitutions)
-            # cert_tools_config.certificate_title = Template(cert_tools_config.certificate_title).safe_substitute(substitutions)
-            # cert_tools_config.criteria_narrative = Template(cert_tools_config.criteria_narrative).safe_substitute(substitutions)
-            # for field in cert_tools_config.additional_global_fields:
-            #     print(type(field))
-            # cert_tools_config.additional_global_fields = ast.literal_eval(cert_tools_config.additional_global_fields)
-            certificate_template = create_certificate_template(cert_tools_config)
-            issuance.certificate_template = json.dumps(certificate_template)
-            issuance.save()
+        # cert_tools_config.certificate_description = Template(cert_tools_config.certificate_description).safe_substitute(substitutions)
+        # cert_tools_config.certificate_title = Template(cert_tools_config.certificate_title).safe_substitute(substitutions)
+        # cert_tools_config.criteria_narrative = Template(cert_tools_config.criteria_narrative).safe_substitute(substitutions)
+        # for field in cert_tools_config.additional_global_fields:
+        #     print(type(field))
+        # cert_tools_config.additional_global_fields = ast.literal_eval(cert_tools_config.additional_global_fields)
+        certificate_template = create_certificate_template(cert_tools_config)
+        issuance.certificate_template = json.dumps(certificate_template)
+        issuance.save()
         issuance_form = IssuanceForm()
         return render(request, 'add_issuance.html', {'form':issuance_form, 'issuance_url':issuance_url})
 

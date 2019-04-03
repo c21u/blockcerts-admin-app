@@ -54,7 +54,7 @@ def push_cert_tools_config():
 
 
 if __name__ == '__main__':
-    print("Pushing cert mailer config...")
+    print("Pushing cert tools config...")
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin_app.settings')
     django.setup()
     from issuer.models import CertToolsConfig
