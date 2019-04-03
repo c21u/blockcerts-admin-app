@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views import View
-from django.db.models.base import ObjectDoesNotExist
 from django.http import QueryDict
 
 from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
@@ -15,9 +14,6 @@ from string import Template
 from cert_tools.create_v2_certificate_template import create_certificate_template
 from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsigned_certificates_from_roster
 from urllib.parse import unquote
-import ast
-import os
-import urllib
 from datetime import datetime
 
 
@@ -44,7 +40,7 @@ class HomePageView(View):
 class AddPersonView(View):
     def get(self, request, issuance_id=None):
         person_form = PersonForm()
-        return render(request, 'add_person.html', {'form':person_form, 'person_added':False})
+        return render(request, 'add_person.html', {'form': person_form, 'person_added': False})
 
     def post(self, request, issuance_id=None):
         # person_data = json.loads(request.body.decode('utf-8'))
@@ -65,7 +61,7 @@ class AddPersonView(View):
                 person = self.add_new_person(person_data)
                 mailer_config_data = CertMailerConfig.objects.all().first()
                 mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
-                person_email = {'first_name':person.first_name, 'email':person.email, 'nonce':person.nonce, 'title':credential.title}
+                person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
                 introduce.send_email(mailer_config, person_email)
                 # return HttpResponse('Created new person')
             else:
@@ -106,7 +102,7 @@ class CredentialView(View):
     def get(self, request):
         if request.user.is_authenticated:
             credential_form = CredentialForm()
-            return render(request, 'add_credential.html', {'form':credential_form})
+            return render(request, 'add_credential.html', {'form': credential_form})
         else:
             return HttpResponseRedirect('/accounts/login')
 
@@ -138,7 +134,7 @@ class CredentialView(View):
 class IssuanceView(View):
     def get(self, request):
         issuance_form = IssuanceForm()
-        return render(request, 'add_issuance.html', {'form': issuance_form, 'issuance_url':False})
+        return render(request, 'add_issuance.html', {'form': issuance_form, 'issuance_url': False})
 
     def post(self, request):
         # issuance_data = json.loads(request.body.decode('utf-8'))
@@ -153,9 +149,9 @@ class IssuanceView(View):
         issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.url_id) + '/add_person/'
         linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
-        substitutions = {'title':linked_credential.title, 'narrative':linked_credential.narrative,
-                         'issuing_department':linked_credential.issuing_department,
-                         'date_issue':issuance.date_issue.strftime("%b %d, %Y"), 'badge_id':linked_credential.badge_id}
+        substitutions = {'title': linked_credential.title, 'narrative': linked_credential.narrative,
+                         'issuing_department': linked_credential.issuing_department,
+                         'date_issue': issuance.date_issue.strftime("%b %d, %Y"), 'badge_id': linked_credential.badge_id}
         cert_tools_config_data = CertToolsConfig.objects.all().first()
         cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
         cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
@@ -173,7 +169,7 @@ class IssuanceView(View):
         issuance.certificate_template = json.dumps(certificate_template)
         issuance.save()
         issuance_form = IssuanceForm()
-        return render(request, 'add_issuance.html', {'form':issuance_form, 'issuance_url':issuance_url})
+        return render(request, 'add_issuance.html', {'form': issuance_form, 'issuance_url': issuance_url})
 
     def add_issuance(self, issuance):
         linked_credential = Credential.objects.get(id=issuance['credential_id'])
@@ -199,15 +195,15 @@ class UnsignedCertificatesView(View):
             if person.public_address != '':
                 print(person.id)
                 issuance = Issuance.objects.get(id=person_issuance.issuance.id)
-                person = {'name':person.first_name + ' ' + person.last_name, 'pubkey':"ecdsa-koblitz-pubkey:" + person.public_address,
-                          'identity':person.email}
+                person = {'name': person.first_name + ' ' + person.last_name, 'pubkey': "ecdsa-koblitz-pubkey:" + person.public_address,
+                          'identity': person.email}
                 person = Recipient(person)
 
                 # print(issuance.certificate_template)
                 person_issuance.unsigned_certificate = create_unsigned_certificates_from_roster(json.loads(issuance.certificate_template),
-                                                                                                 [person], False,
-                                                                                                 cert_tools_config.additional_per_recipient_fields,
-                                                                                              cert_tools_config.hash_emails)
+                                                                                                [person], False,
+                                                                                                cert_tools_config.additional_per_recipient_fields,
+                                                                                                cert_tools_config.hash_emails)
                 # print(person_issuance.unsigned_certificated)
                 person_issuance.save()
                 print("Save")
