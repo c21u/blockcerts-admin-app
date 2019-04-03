@@ -107,9 +107,6 @@ class CredentialView(View):
             return HttpResponseRedirect('/accounts/login')
 
     def post(self, request):
-        # credential_data = json.loads(request.body.decode('utf-8'))
-        # credential_id = self.add_credential(credential_data)
-        # return JsonResponse({'credential_id':credential_id})
         credential_form = CredentialForm(request.POST)
         if credential_form.is_valid():
             credential_data = {}
@@ -128,7 +125,6 @@ class CredentialView(View):
             narrative=credential['narrative'],
             issuing_department=credential['issuing_department']
         )
-        # return credential.id
 
 
 class IssuanceView(View):
@@ -137,16 +133,12 @@ class IssuanceView(View):
         return render(request, 'add_issuance.html', {'form': issuance_form, 'issuance_url': False})
 
     def post(self, request):
-        # issuance_data = json.loads(request.body.decode('utf-8'))
-        # issuance_id = self.add_issuance(issuance_data)
-        # return JsonResponse({'issuance_link':issuance_id})
-        # if issuance_form.is_valid():
         issuance_data = {}
         issuance_post = request.POST
         issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
         issuance = self.add_issuance(issuance_data)
-        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.url_id) + '/add_person/'
+        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.id) + '/add_or_update_person/'
         linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
         substitutions = {'title': linked_credential.title, 'narrative': linked_credential.narrative,
@@ -155,16 +147,8 @@ class IssuanceView(View):
         cert_tools_config_data = CertToolsConfig.objects.all().first()
         cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
         cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
-        # for i in range(len(cert_tools_config.additional_global_fields)):
-        #     cert_tools_config.additional_global_fields[i] = cert_tools_config.additional_global_fields[i].__dict__
         recursive_namespace_to_dict(cert_tools_config.additional_global_fields)
 
-        # cert_tools_config.certificate_description = Template(cert_tools_config.certificate_description).safe_substitute(substitutions)
-        # cert_tools_config.certificate_title = Template(cert_tools_config.certificate_title).safe_substitute(substitutions)
-        # cert_tools_config.criteria_narrative = Template(cert_tools_config.criteria_narrative).safe_substitute(substitutions)
-        # for field in cert_tools_config.additional_global_fields:
-        #     print(type(field))
-        # cert_tools_config.additional_global_fields = ast.literal_eval(cert_tools_config.additional_global_fields)
         certificate_template = create_certificate_template(cert_tools_config)
         issuance.certificate_template = json.dumps(certificate_template)
         issuance.save()
@@ -181,7 +165,6 @@ class IssuanceView(View):
             url_id=url_id,
             credential=linked_credential
         )
-        # issuance.associated_filename = (str(issuance.id) + '_' + issuance.date_issue.strftime("%Y/%m/%d")).replace('/', '_')
         return issuance
 
 
@@ -199,12 +182,10 @@ class UnsignedCertificatesView(View):
                           'identity': person.email}
                 person = Recipient(person)
 
-                # print(issuance.certificate_template)
                 person_issuance.unsigned_certificate = create_unsigned_certificates_from_roster(json.loads(issuance.certificate_template),
                                                                                                 [person], False,
                                                                                                 cert_tools_config.additional_per_recipient_fields,
                                                                                                 cert_tools_config.hash_emails)
-                # print(person_issuance.unsigned_certificated)
                 person_issuance.save()
                 print("Save")
         return HttpResponse("DONE")
