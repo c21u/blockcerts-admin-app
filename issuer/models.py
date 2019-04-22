@@ -1,18 +1,22 @@
 from django.db import models
-from django.utils.timezone import now
+from uuid import uuid4
 # Create your models here.
 
+def get_uuid():
+    return str(uuid4())
 
 class Credential(models.Model):
     title = models.TextField()
     description = models.TextField()
     narrative = models.TextField()
     issuing_department = models.CharField(max_length=50)
+    badge_id = models.TextField(default=get_uuid)
 
 
 class Issuance(models.Model):
     date_issue = models.DateField()
     certificate_template = models.TextField(default='')
+    url_id = models.TextField(default='')
     credential = models.ForeignKey(Credential, on_delete=models.CASCADE)
 
 

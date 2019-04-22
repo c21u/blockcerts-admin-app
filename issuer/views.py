@@ -46,7 +46,7 @@ class AddPersonView(View):
         if person_form.is_valid():
             person_data = {}
             # issuance_id = int(issuance_id)
-            issuance = Issuance.objects.get(id=int(issuance_id))
+            issuance = Issuance.objects.get(url_id=issuance_id)
             credential = issuance.credential
             person_data['first_name'] = person_form.cleaned_data['first_name']
             person_data['last_name'] = person_form.cleaned_data['last_name']
@@ -63,7 +63,7 @@ class AddPersonView(View):
                 # return HttpResponse('Created new person')
             else:
                 person = Person.objects.get(email=person_data['email'])
-            issuance = Issuance.objects.get(id=int(issuance_id))
+            # issuance = Issuance.objects.get(id=int(issuance_id))
             person_issuance, created = PersonIssuances.objects.get_or_create(
                 person=person,
                 issuance=issuance
@@ -93,6 +93,7 @@ class UpdatePersonView(View):
 
     def update_person(self, person):
         Person.objects.filter(nonce=person['nonce']).update(public_address=person['public_address'])
+
 
 class CredentialView(View):
     def get(self, request):
@@ -139,11 +140,12 @@ class IssuanceView(View):
         issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
         issuance = self.add_issuance(issuance_data)
-        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.id) + '/add_person/'
+        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.url_id) + '/add_person/'
         linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
         substitutions = {'title':linked_credential.title, 'narrative':linked_credential.narrative,
-                         'issuing_department':linked_credential.issuing_department, 'date_issue':issuance.date_issue.strftime("%b %d, %Y")}
+                         'issuing_department':linked_credential.issuing_department,
+                         'date_issue':issuance.date_issue.strftime("%b %d, %Y"), 'badge_id':linked_credential.badge_id}
         cert_tools_config_data = CertToolsConfig.objects.all().first()
         cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
         cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
@@ -165,8 +167,12 @@ class IssuanceView(View):
 
     def add_issuance(self, issuance):
         linked_credential = Credential.objects.get(id=issuance['credential_id'])
+        url_id = uuid.uuid4().hex[:6].upper()
+        while Issuance.objects.filter(url_id=url_id).exists():
+            url_id = uuid.uuid4().hex[:6].upper()
         issuance, created = Issuance.objects.get_or_create(
             date_issue=issuance['date_issue'],
+            url_id=url_id,
             credential=linked_credential
         )
         # issuance.associated_filename = (str(issuance.id) + '_' + issuance.date_issue.strftime("%Y/%m/%d")).replace('/', '_')
