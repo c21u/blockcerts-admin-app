@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views import View
 from django.db.models.base import ObjectDoesNotExist
 from django.http import QueryDict
@@ -20,6 +20,7 @@ import os
 import urllib
 from datetime import datetime
 
+
 def recursive_namespace_to_dict(obj):
     if isinstance(obj, list):
         for i in range(len(obj)):
@@ -31,7 +32,13 @@ def recursive_namespace_to_dict(obj):
             if isinstance(obj[key], Namespace):
                 obj[key] = obj[key].__dict__
             recursive_namespace_to_dict(obj[key])
+
 # Create your views here.
+
+
+class HomePageView(View):
+    def get(self, request):
+        return render(request, 'index.html')
 
 
 class AddPersonView(View):
@@ -97,8 +104,11 @@ class UpdatePersonView(View):
 
 class CredentialView(View):
     def get(self, request):
-        credential_form = CredentialForm()
-        return render(request, 'add_credential.html', {'form':credential_form})
+        if request.user.is_authenticated:
+            credential_form = CredentialForm()
+            return render(request, 'add_credential.html', {'form':credential_form})
+        else:
+            return HttpResponseRedirect('/accounts/login')
 
     def post(self, request):
         # credential_data = json.loads(request.body.decode('utf-8'))

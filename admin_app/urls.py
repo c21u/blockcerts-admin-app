@@ -16,11 +16,17 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import path
+import django_cas_ng.views
 
-from issuer.views import AddPersonView, UpdatePersonView, CredentialView, IssuanceView, UnsignedCertificatesView, ThankYouView
+from issuer.views import HomePageView, AddPersonView, UpdatePersonView, CredentialView, IssuanceView, UnsignedCertificatesView, ThankYouView
 
 urlpatterns = [
+    path('accounts/login', django_cas_ng.views.LoginView.as_view(), name='cas_ng_login'),
+    path('accounts/logout', django_cas_ng.views.LogoutView.as_view(), name='cas_ng_logout'),
+    url(r'^accounts/callback$', django_cas_ng.views.CallbackView.as_view(), name='cas_ng_proxy_callback'),
     url(r'^admin/', admin.site.urls),
+    url(r'^$', HomePageView.as_view()),
     url(r'^(?P<issuance_id>\w+)/add_person/', csrf_exempt(AddPersonView.as_view())),
     url(r'^update_person/', csrf_exempt(UpdatePersonView.as_view())),
     url(r'^add_credential/', csrf_exempt(CredentialView.as_view())),
