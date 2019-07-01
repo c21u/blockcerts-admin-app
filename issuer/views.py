@@ -1,7 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views import View
-from django.http import QueryDict
 
 from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
@@ -13,7 +12,6 @@ from cert_mailer import introduce
 from string import Template
 from cert_tools.create_v2_certificate_template import create_certificate_template
 from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsigned_certificates_from_roster
-from urllib.parse import unquote
 from datetime import datetime
 
 

@@ -2,8 +2,10 @@ from django.db import models
 from uuid import uuid4
 # Create your models here.
 
+
 def get_uuid():
     return str(uuid4())
+
 
 class Credential(models.Model):
     title = models.TextField()
