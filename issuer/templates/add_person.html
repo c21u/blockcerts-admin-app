@@ -3,21 +3,23 @@
 {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
 {{ form.media }}
 {% block body_block %}
-    {% if person_added %}
-        <p>Thanks for registering!</p>
-    {% else %}
-        <div class="row">
+    <div class="container">
+        {% if person_added %}
+        <p class="pt-2">Thanks for registering!</p>
+        {% else %}
+        <div class="row pt-2">
             <div class='col-sm-6'>
                 <form id="person-form" method="post">
                     {% csrf_token %}
                     {% bootstrap_form form %}
                     {% buttons %}
-                        <button type="submit" class="btn btn-primary">
-                            Submit
-                        </button>
+                    <button type="submit" class="btn btn-primary">
+                        Submit
+                    </button>
                     {% endbuttons %}
                 </form>
             </div>
         </div>
-    {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}

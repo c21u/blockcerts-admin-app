@@ -41,20 +41,14 @@ class AddPersonView(View):
         return render(request, 'add_person.html', {'form': person_form, 'person_added': False})
 
     def post(self, request, issuance_id=None):
-        # person_data = json.loads(request.body.decode('utf-8'))
-        # put = QueryDict(request.body)
         person_form = PersonForm(request.POST)
         if person_form.is_valid():
             person_data = {}
-            # issuance_id = int(issuance_id)
             issuance = Issuance.objects.get(url_id=issuance_id)
             credential = issuance.credential
             person_data['first_name'] = person_form.cleaned_data['first_name']
             person_data['last_name'] = person_form.cleaned_data['last_name']
             person_data['email'] = person_form.cleaned_data['email']
-            # person_data['first_name'] = unquote(put.get('first_name'))
-            # person_data['last_name'] = unquote(put.get('last_name'))
-            # person_data['email'] = unquote(put.get('email'))
             if not Person.objects.filter(email=person_data['email']).exists():
                 person = self.add_new_person(person_data)
                 mailer_config_data = CertMailerConfig.objects.all().first()
@@ -71,7 +65,6 @@ class AddPersonView(View):
             )
             person_form = PersonForm()
             return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
-        # return JsonResponse({"success":"Person Added"})
 
     def add_new_person(self, person):
         nonce = uuid.uuid4().hex[:6].upper()
@@ -136,7 +129,7 @@ class IssuanceView(View):
         issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
         issuance = self.add_issuance(issuance_data)
-        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.id) + '/add_or_update_person/'
+        issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.url_id) + '/add_person/'
         linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
         substitutions = {'title': linked_credential.title, 'narrative': linked_credential.narrative,

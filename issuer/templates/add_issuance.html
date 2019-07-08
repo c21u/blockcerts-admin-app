@@ -18,6 +18,6 @@
         </div>
     </div>
     {% if issuance_url %}
-        <p>URL to register people for this issuance is: {{ issuance_url }}</p>
+    <p>URL to register people for this issuance is: <a href="{{ issuance_url }}">{{ issuance_url }}</a></p>
     {% endif %}
 {% endblock %}
