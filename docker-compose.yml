@@ -1,23 +1,42 @@
 version: '3'
 
 services:
-#  db:
-#    image: postgres
-#    volumes:
-#    - postgres_data:/var/lib/postgresql/data/
-#    environment:
-#        POSTGRES_USER: admin
-#        POSTGRES_PASSWORD: c21u_admin_cert_access
-#        POSTGRES_DB: certs
+  db:
+    image: postgres
+    volumes:
+    - postgres_data:/var/lib/postgresql/data/
+    environment:
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: c21u_admin_cert_access
+        POSTGRES_DB: certs
   web:
     build: .
     command: sh /code/run.sh
+    environment:
+      DB_ENGINE: django.db.backends.postgresql
+      DB_HOST: db
+      DB_USER: admin
+      DB_NAME: certs
+      DB_PASSWORD: c21u_admin_cert_access
+      MANDRILL_API_KEY: $MANDRILL_API_KEY
+      HOSTNAME: admin.127.0.0.1.xip.io
+      VIRTUAL_HOST: admin.127.0.0.1.xip.io
+      CAS_SERVER_URL: $CAS_SERVER_URL
     volumes:
       - .:/code
-    ports:
-      - "8000:8000"
-#    depends_on:
-#      - db
+    expose:
+      - "8000"
+    depends_on:
+      - db
 
-#volumes:
-#  postgres_data:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - $HOME/certs:/etc/nginx/certs
+
+volumes:
+  postgres_data:

@@ -30,6 +30,7 @@ DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = [os.getenv('HOSTNAME', '0.0.0.0')]
 
+USE_X_FORWARDED_HOST = True
 
 # Application definition
 
@@ -62,7 +63,7 @@ AUTHENTICATION_BACKENDS = [
     'django_cas_ng.backends.CASBackend',
 ]
 
-CAS_SERVER_URL = 'https://login.gatech.edu/cas'
+CAS_SERVER_URL = os.getenv('CAS_SERVER_URL', 'https://login.example.com/cas')
 
 ROOT_URLCONF = 'admin_app.urls'
 
