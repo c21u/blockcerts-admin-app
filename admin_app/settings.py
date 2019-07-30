@@ -60,7 +60,7 @@ MIDDLEWARE = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'django_cas_ng.backends.CASBackend',
+    'issuer.backends.CASAdminOnlyBackend',
 ]
 
 CAS_SERVER_URL = os.getenv('CAS_SERVER_URL', 'https://login.example.com/cas')
