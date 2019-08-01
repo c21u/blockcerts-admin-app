@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #python3 /code/manage.py flush --noinput
-pip install -e git+https://github.com/blockchain-certificates/cert-tools#egg=cert-tools
 python3 /code/manage.py makemigrations
 python3 /code/manage.py migrate --noinput
 python3 /code/import_data.py
