@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import View
@@ -89,13 +90,10 @@ class UpdatePersonView(View):
         Person.objects.filter(nonce=person['nonce']).update(public_address=person['public_address'])
 
 
-class CredentialView(View):
+class CredentialView(LoginRequiredMixin, View):
     def get(self, request):
-        if request.user.is_authenticated:
-            credential_form = CredentialForm()
-            return render(request, 'add_credential.html', {'form': credential_form})
-        else:
-            return HttpResponseRedirect('/accounts/login')
+        credential_form = CredentialForm()
+        return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request):
         credential_form = CredentialForm(request.POST)
@@ -118,7 +116,7 @@ class CredentialView(View):
         )
 
 
-class IssuanceView(View):
+class IssuanceView(LoginRequiredMixin, View):
     def get(self, request):
         issuance_form = IssuanceForm()
         return render(request, 'add_issuance.html', {'form': issuance_form, 'issuance_url': False})
