@@ -19,11 +19,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 import django_cas_ng.views
 
-from issuer.views import HomePageView, AddPersonView, UpdatePersonView, CredentialView, IssuanceView, UnsignedCertificatesView, ThankYouView
+from issuer.views import HomePageView, AddPersonView, UpdatePersonView, CredentialView, IssuanceView, UnsignedCertificatesView, ThankYouView, IssuancesPageView
 
 urlpatterns = [
     path('accounts/login', django_cas_ng.views.LoginView.as_view(), name='cas_ng_login'),
     path('accounts/logout', django_cas_ng.views.LogoutView.as_view(), name='cas_ng_logout'),
+    path('issuances', IssuancesPageView.as_view(), name='issuances'),
     url(r'^accounts/callback$', django_cas_ng.views.CallbackView.as_view(), name='cas_ng_proxy_callback'),
     url(r'^admin/', admin.site.urls),
     url(r'^$', HomePageView.as_view()),

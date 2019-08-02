@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views import View
+from django.views import generic, View
 
 from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
@@ -183,3 +183,7 @@ class UnsignedCertificatesView(View):
 class ThankYouView(View):
     def get(self, request):
         return render(request, 'thankyou.html')
+
+
+class IssuancesPageView(generic.ListView):
+    model = Credential

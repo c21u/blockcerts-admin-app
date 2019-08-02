@@ -20,6 +20,16 @@ class Issuance(models.Model):
     certificate_template = models.TextField(default='')
     url_id = models.TextField(default='')
     credential = models.ForeignKey(Credential, on_delete=models.CASCADE)
+    people = models.ManyToManyField('Person', through='PersonIssuances', related_name='issuance')
+
+    def ready_count(self):
+        return self.people.exclude(public_address='').count() - self.issued_count()
+
+    def unready_count(self):
+        return self.people.filter(public_address='').count()
+
+    def issued_count(self):
+        return self.personissuances_set.filter(is_issued=True).count()
 
 
 class Person(models.Model):
