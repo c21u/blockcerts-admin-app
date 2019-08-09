@@ -5,6 +5,8 @@
     {% bootstrap_css %}         {# Embed Bootstrap CSS #}
     {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
     {{ form.media }}
+</head>
+<body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="/">C21U</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,8 +27,7 @@
             </ul>
         </div>
     </nav>
-</head>
-<body>
+
     <div class="container">
         {% block body_block %}{% endblock %}
     </div>
