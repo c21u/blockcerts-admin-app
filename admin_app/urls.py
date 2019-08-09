@@ -19,7 +19,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 import django_cas_ng.views
 
-from issuer.views import HomePageView, AddPersonView, UpdatePersonView, CredentialView, IssuanceView, UnsignedCertificatesView, ThankYouView, IssuancesPageView
+from issuer.views import (HomePageView,
+                          AddPersonView,
+                          UpdatePersonView,
+                          CredentialView,
+                          IssuanceView,
+                          UnsignedCertificatesView,
+                          ThankYouView,
+                          IssuancesPageView,
+                          UpdateCredentialView)
 
 urlpatterns = [
     path('accounts/login', django_cas_ng.views.LoginView.as_view(), name='cas_ng_login'),
@@ -29,6 +37,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', HomePageView.as_view()),
     url(r'^(?P<issuance_id>\w+)/add_person/', csrf_exempt(AddPersonView.as_view())),
+    url(r'^credential/(?P<id>\d+)', csrf_exempt(UpdateCredentialView.as_view())),
     url(r'^update_person/', csrf_exempt(UpdatePersonView.as_view())),
     url(r'^add_credential/', csrf_exempt(CredentialView.as_view())),
     url(r'^add_issuance/', csrf_exempt(IssuanceView.as_view())),

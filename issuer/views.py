@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.views import generic, View
 
 from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
@@ -114,6 +114,18 @@ class CredentialView(LoginRequiredMixin, View):
             narrative=credential['narrative'],
             issuing_department=credential['issuing_department']
         )
+
+
+class UpdateCredentialView(LoginRequiredMixin, View):
+    def get(self, request, id=None):
+        credential = Credential.objects.get(id=id)
+        credential_form = CredentialForm(instance=credential)
+        return render(request, 'add_credential.html', {'form': credential_form})
+
+    def post(self, request, id=None):
+        credential_form = CredentialForm(request.POST, instance=Credential.objects.get(id=id))
+        credential_form.save()
+        return render(request, 'add_credential.html', {'form': credential_form})
 
 
 class IssuanceView(LoginRequiredMixin, View):

@@ -7,14 +7,13 @@ from .models import Credential
 class PersonForm(forms.Form):
     first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'id': 'first_name'}))
     last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'id': 'last_name'}))
-    email = forms.CharField(label='Email', widget=forms.TextInput(attrs={'id': 'email'}))
+    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'id': 'email'}))
 
 
-class CredentialForm(forms.Form):
-    title = forms.CharField(label='Title')
-    description = forms.CharField(label='Description')
-    narrative = forms.CharField(label='Narrative')
-    issuing_department = forms.CharField(label='Issuing Department')
+class CredentialForm(forms.ModelForm):
+    class Meta:
+        model = Credential
+        fields = ["title", "description", "narrative", "issuing_department"]
 
 
 class IssuanceForm(forms.Form):
