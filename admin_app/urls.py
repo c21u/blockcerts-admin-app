@@ -27,7 +27,8 @@ from issuer.views import (HomePageView,
                           UnsignedCertificatesView,
                           ThankYouView,
                           IssuancesPageView,
-                          UpdateCredentialView)
+                          UpdateCredentialView,
+                          ManageRecipientsView)
 
 urlpatterns = [
     path('accounts/login', django_cas_ng.views.LoginView.as_view(), name='cas_ng_login'),
@@ -42,5 +43,6 @@ urlpatterns = [
     url(r'^add_credential/', csrf_exempt(CredentialView.as_view())),
     url(r'^add_issuance/', csrf_exempt(IssuanceView.as_view())),
     url(r'^unsigned_certificates/', csrf_exempt(UnsignedCertificatesView.as_view())),
-    url(r'^thankyou/', ThankYouView.as_view())
+    url(r'^thankyou/', ThankYouView.as_view()),
+    url(r'^manage_recipients/', ManageRecipientsView.as_view())
 ]

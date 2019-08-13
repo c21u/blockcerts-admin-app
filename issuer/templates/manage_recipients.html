@@ -1,0 +1,18 @@
+{% extends 'header.html' %}
+{% load bootstrap4 %}       {# import bootstrap4/bootstrap3 #}
+{% bootstrap_css %}         {# Embed Bootstrap CSS #}
+{% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
+{% block body_block %}
+    <h1>Manage Recipients</h1>
+    {% for credential in object_list %}
+        <h3>{{ credential.title }}</h3>
+        <ul>
+        {% for issuance in credential.issuance_set.all %}
+            <li>{{issuance.date_issue}}: Invite | Approve | Remind | Completed</li>
+        {% endfor %}
+        </ul>
+    {% empty %}
+        <p>No credentials to manage.</p>
+    {% endfor %}
+
+{% endblock %}

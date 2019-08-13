@@ -199,3 +199,8 @@ class ThankYouView(View):
 
 class IssuancesPageView(generic.ListView):
     model = Credential
+
+
+class ManageRecipientsView(generic.ListView):
+    model = Credential
+    template_name = "manage_recipients.html"
