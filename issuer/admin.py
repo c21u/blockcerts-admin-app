@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Person, Credential, Issuance
+from .models import Person, Credential, Issuance, CertMailerConfig
 
 # Register your models here.
 
@@ -7,3 +7,4 @@ from .models import Person, Credential, Issuance
 admin.site.register(Person)
 admin.site.register(Credential)
 admin.site.register(Issuance)
+admin.site.register(CertMailerConfig)

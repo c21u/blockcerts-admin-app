@@ -42,7 +42,11 @@ class Person(models.Model):
 
 
 class CertMailerConfig(models.Model):
-    config = models.TextField()
+    mailer = models.CharField(max_length=50)
+    from_email = models.CharField(max_length=100)
+    introduction_url = models.CharField(max_length=250)
+    introduction_email_subject = models.CharField(max_length=250)
+    introduction_email_body = models.TextField()
 
 
 class CertToolsConfig(models.Model):
