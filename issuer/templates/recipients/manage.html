@@ -1,0 +1,36 @@
+{% extends 'header.html' %}
+{% block body_block %}
+    <h1>Manage Recipients</h1>
+    {% for credential in object_list %}
+        <h3>{{ credential.title }}</h3>
+        <ul>
+        {% for issuance in credential.issuance_set.all %}
+            <li>
+                {{ issuance.date_issue }}:
+                <a
+                    class="btn btn-link"
+                    href="{% url 'recipients/invite' issuance.pk %}">
+                    Invite
+                </a> |
+                <a
+                    class="btn btn-link {% if issuance.ready_count == 0 %}disabled{% endif %}"
+                    href="{% url 'recipients/approve' issuance.pk %}">
+                    Approve
+                </a> |
+                <a
+                    class="btn btn-link {% if issuance.unready_count == 0 %}disabled{% endif %}"
+                    href="{% url 'recipients/remind' issuance.pk %}">
+                    Remind
+                </a> |
+                <a
+                    class="btn btn-link {% if issuance.issued_count == 0 %}disabled{% endif %}"
+                    href="{% url 'recipients/completed' issuance.pk %}">
+                    Completed
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% empty %}
+        <p>No credentials to manage.</p>
+    {% endfor %}
+{% endblock %}

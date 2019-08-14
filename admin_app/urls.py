@@ -28,6 +28,10 @@ from issuer.views import (HomePageView,
                           ThankYouView,
                           IssuancesPageView,
                           UpdateCredentialView,
+                          ApproveRecipientsView,
+                          CompletedRecipientsView,
+                          InviteRecipientsView,
+                          RemindRecipientsView,
                           ManageRecipientsView)
 
 urlpatterns = [
@@ -44,5 +48,9 @@ urlpatterns = [
     url(r'^add_issuance/', csrf_exempt(IssuanceView.as_view())),
     url(r'^unsigned_certificates/', csrf_exempt(UnsignedCertificatesView.as_view())),
     url(r'^thankyou/', ThankYouView.as_view()),
-    url(r'^manage_recipients/', ManageRecipientsView.as_view())
+    url(r'^manage_recipients/(?P<pk>\w+)/approve', ApproveRecipientsView.as_view(), name='recipients/approve'),
+    url(r'^manage_recipients/(?P<pk>\w+)/completed', CompletedRecipientsView.as_view(), name='recipients/completed'),
+    url(r'^manage_recipients/(?P<pk>\w+)/invite', InviteRecipientsView.as_view(), name='recipients/invite'),
+    url(r'^manage_recipients/(?P<pk>\w+)/remind', RemindRecipientsView.as_view(), name='recipients/remind'),
+    url(r'^manage_recipients/', ManageRecipientsView.as_view(), name='recipients/manage'),
 ]

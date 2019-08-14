@@ -1,0 +1,37 @@
+{% extends 'header.html' %}
+{% block body_block %}
+    <h1>Manage Recipients - Remind</h1>
+    <h3>{{ issuance.credential.title }}</h3>
+    <h4>{{ issuance.date_issue }}</h4>
+    <p>
+        The following have been invited to qualify for this credential, but they
+        have not yet added Georgia Tech as an issuer in their Blockcerts
+        application. Select "Remind" to send a reminder email with instructions.
+    </p>
+    <table class="table">
+    <thead>
+        <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Status</th>
+        <th scope="col">Last reminded</th>
+        <th scope="col">Remind</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for person in issuance.people.all %}
+        <tr>
+            <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
+            <td>{{ person.email }}</td>
+            <td>?</td>
+            <td></td>
+            <td><input type="checkbox" /></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    <br />
+    [Submit] [Cancel]
+    <br />
+
+{% endblock %}

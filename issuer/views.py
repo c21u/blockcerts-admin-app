@@ -201,6 +201,26 @@ class IssuancesPageView(generic.ListView):
     model = Credential
 
 
+class ApproveRecipientsView(generic.DetailView):
+    model = Issuance
+    template_name = "recipients/approve.html"
+
+
+class CompletedRecipientsView(generic.DetailView):
+    model = Issuance
+    template_name = "recipients/completed.html"
+
+
+class InviteRecipientsView(generic.DetailView):
+    model = Issuance
+    template_name = "recipients/invite.html"
+
+
+class RemindRecipientsView(generic.DetailView):
+    model = Issuance
+    template_name = "recipients/remind.html"
+
+
 class ManageRecipientsView(generic.ListView):
     model = Credential
-    template_name = "manage_recipients.html"
+    template_name = "recipients/manage.html"

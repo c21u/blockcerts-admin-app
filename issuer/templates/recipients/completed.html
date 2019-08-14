@@ -1,0 +1,9 @@
+{% extends 'header.html' %}
+{% block body_block %}
+    <h1>Manage Recipients - Completed</h1>
+    <h3>{{ issuance.credential.title }}</h3>
+    <h4>{{ issuance.date_issue }}</h4>
+    <p>The following have been issued your credential. Those with a "Pending" status will be notified via email during the next scheduled batch issuance.</p>
+    <p>[some table]</p>
+    <p>[Submit] [Cancel]</p>
+{% endblock %}

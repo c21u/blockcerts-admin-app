@@ -1,0 +1,27 @@
+{% extends 'header.html' %}
+{% block body_block %}
+    <h1>Manage Recipients - Invite</h1>
+    <h3>{{ issuance.credential.title }}</h3>
+    <h4>{{ issuance.date_issue }}</h4>
+
+    <br />
+
+    <h5>Sign Up Link</h5>
+    <p>Send this web invitation to potential recipients and obtain their public blockchain key. After completing the form, recipients will be sent further instructions via email.</p>
+    <p>
+        <a href="{{ request.scheme }}://{{ request.get_host }}/{{ issuance.url_id }}/add_person">
+            {{ request.scheme }}://{{ request.get_host }}/{{ issuance.url_id }}/add_person
+        </a>
+    </p>
+
+    <br />
+    <br />
+
+    <h5>Upload CSV</h5>
+    <p>Upload a CSV to invite potential recipients and obtain their public blockchain key. After uploading your CSV, recipients will be sent further instructions via email. <a href="#">Download a CSV template to begin.</a></p>
+    <p><a href="#">file.csv</a></p>
+    <a class="btn btn-primary" href="{% url 'recipients/approve' issuance.pk %}">
+        Upload and get redirected to Approve
+    </a>
+
+{% endblock %}
