@@ -8,6 +8,8 @@
         have not yet added Georgia Tech as an issuer in their Blockcerts
         application. Select "Remind" to send a reminder email with instructions.
     </p>
+    <form method="post" novalidate>
+    {% csrf_token %}
     <table class="table">
     <thead>
         <tr>
@@ -25,13 +27,19 @@
             <td>{{ person.email }}</td>
             <td>?</td>
             <td></td>
-            <td><input type="checkbox" /></td>
+            <td>
+                <input type="checkbox" name="people_to_remind" value="{{ person.pk }}" />
+            </td>
         </tr>
     {% endfor %}
     </tbody>
     </table>
-    <br />
-    [Submit] [Cancel]
-    <br />
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+    <a class="btn btn-secondary" href="{% url 'recipients/manage' %}">
+        Cancel
+    </a>
+    </form>
 
 {% endblock %}

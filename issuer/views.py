@@ -220,6 +220,13 @@ class RemindRecipientsView(generic.DetailView):
     model = Issuance
     template_name = "recipients/remind.html"
 
+    def post(self, request, *args, **kwargs):
+        data = request.POST.copy()
+        remind_list = data.getlist('people_to_remind')
+        people = Person.objects.filter(pk__in=remind_list)
+
+        return render(request, 'recipients/remind_success.html', {'reminded_count': len(people)})
+
 
 class ManageRecipientsView(generic.ListView):
     model = Credential
