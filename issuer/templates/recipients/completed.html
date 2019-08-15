@@ -4,6 +4,32 @@
     <h3>{{ issuance.credential.title }}</h3>
     <h4>{{ issuance.date_issue }}</h4>
     <p>The following have been issued your credential. Those with a "Pending" status will be notified via email during the next scheduled batch issuance.</p>
-    <p>[some table]</p>
-    <p>[Submit] [Cancel]</p>
+
+    <table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last notified</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for person in issuance.people.all %}
+        <tr>
+            <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
+            <td>{{ person.email }}</td>
+            <td>?</td>
+            <td></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+    <a class="btn btn-secondary" href="{% url 'recipients/manage' %}">
+        Cancel
+    </a>
 {% endblock %}

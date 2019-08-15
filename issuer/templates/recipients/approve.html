@@ -4,6 +4,33 @@
     <h3>{{ issuance.credential.title }}</h3>
     <h4>{{ issuance.date_issue }}</h4>
     <p>The following have been invited to qualify for this credential. After they have completed your credential's requirments, select "Approve" to initiate an issuance to that person.</p>
-    <p>[some table]</p>
-    [Submit] [Cancel]
+    <table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Public address</th>
+            <th scope="col">Approve</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for person in issuance.people.all %}
+        <tr>
+            <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
+            <td>{{ person.email }}</td>
+            <td>{{ person.public_address }}</td>
+            <td>
+                <input type="checkbox" name="people_to_approve" value="{{ person.pk }}" />
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+    <a class="btn btn-secondary" href="{% url 'recipients/manage' %}">
+        Cancel
+    </a>
 {% endblock %}
