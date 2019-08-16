@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import generic, View
 
-from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
+from .models import Person, Credential, Issuance, CertToolsConfig, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
 
 import json
@@ -52,14 +53,12 @@ class AddPersonView(View):
             person_data['email'] = person_form.cleaned_data['email']
             if not Person.objects.filter(email=person_data['email']).exists():
                 person = self.add_new_person(person_data)
-                mailer_config_data = CertMailerConfig.objects.all().first()
-                mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
+                mailer_config = credential.cert_mailer_config
+                mailer_config.introduction_url = settings.ISSUER_URL
                 person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
                 introduce.send_email(mailer_config, person_email)
-                # return HttpResponse('Created new person')
             else:
                 person = Person.objects.get(email=person_data['email'])
-            # issuance = Issuance.objects.get(id=int(issuance_id))
             person_issuance, created = PersonIssuances.objects.get_or_create(
                 person=person,
                 issuance=issuance
@@ -98,12 +97,7 @@ class CredentialView(LoginRequiredMixin, View):
     def post(self, request):
         credential_form = CredentialForm(request.POST)
         if credential_form.is_valid():
-            credential_data = {}
-            credential_data['title'] = credential_form.cleaned_data['title']
-            credential_data['description'] = credential_form.cleaned_data['description']
-            credential_data['narrative'] = credential_form.cleaned_data['narrative']
-            credential_data['issuing_department'] = credential_form.cleaned_data['issuing_department']
-            self.add_credential(credential_data)
+            self.add_credential(credential_form.cleaned_data)
         credential_form = CredentialForm()
         return render(request, 'add_credential.html', {'form': credential_form})
 
@@ -112,7 +106,8 @@ class CredentialView(LoginRequiredMixin, View):
             title=credential['title'],
             description=credential['description'],
             narrative=credential['narrative'],
-            issuing_department=credential['issuing_department']
+            issuing_department=credential['issuing_department'],
+            cert_mailer_config=credential['cert_mailer_config']
         )
 
 
