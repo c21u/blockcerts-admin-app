@@ -205,6 +205,11 @@ class ApproveRecipientsView(generic.DetailView):
     model = Issuance
     template_name = "recipients/approve.html"
 
+    def post(self, request, *args, **kwargs):
+        data = request.POST.copy()
+        people_to_approve = data.getlist('people_to_approve')
+        return render(request, 'recipients/approve_success.html', {'approved_count': len(people_to_approve)})
+
 
 class CompletedRecipientsView(generic.DetailView):
     model = Issuance
@@ -223,9 +228,16 @@ class RemindRecipientsView(generic.DetailView):
     def post(self, request, *args, **kwargs):
         data = request.POST.copy()
         remind_list = data.getlist('people_to_remind')
-        people = Person.objects.filter(pk__in=remind_list)
+        people_to_remind = Person.objects.filter(pk__in=remind_list)
+        issuance = self.get_object()
 
-        return render(request, 'recipients/remind_success.html', {'reminded_count': len(people)})
+        for person in people_to_remind:
+            mailer_config_data = CertMailerConfig.objects.all().first()
+            mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
+            person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': issuance.credential.title}
+            introduce.send_email(mailer_config, person_email)
+
+        return render(request, 'recipients/remind_success.html', {'reminded_count': len(people_to_remind)})
 
 
 class ManageRecipientsView(generic.ListView):
