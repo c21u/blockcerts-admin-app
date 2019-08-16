@@ -7,11 +7,25 @@ def get_uuid():
     return str(uuid4())
 
 
+class CertMailerConfig(models.Model):
+    name = models.CharField(max_length=50)
+    mailer = models.CharField(max_length=50, choices=(("stdout", "Log instead of mailing"), ("mandrill", "Mailchimp Mandrill"), ("sendgrid", "Sendgrid")))
+    from_email = models.CharField(max_length=100)
+    introduction_email_subject = models.CharField(max_length=250)
+    introduction_email_body = models.TextField()
+    cert_email_subject = models.CharField(max_length=100)
+    cert_email_body = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 class Credential(models.Model):
     title = models.TextField()
     description = models.TextField()
     narrative = models.TextField()
     issuing_department = models.CharField(max_length=50)
+    cert_mailer_config = models.ForeignKey(CertMailerConfig, on_delete=models.CASCADE)
     badge_id = models.TextField(default=get_uuid)
 
 
@@ -39,10 +53,6 @@ class Person(models.Model):
     public_address = models.CharField(max_length=250, default='')
     nonce = models.CharField(max_length=50, default='')
     add_issuer_timestamp = models.DateTimeField(auto_now_add=True)
-
-
-class CertMailerConfig(models.Model):
-    config = models.TextField()
 
 
 class CertToolsConfig(models.Model):

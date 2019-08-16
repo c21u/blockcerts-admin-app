@@ -13,7 +13,7 @@ class PersonForm(forms.Form):
 class CredentialForm(forms.ModelForm):
     class Meta:
         model = Credential
-        fields = ["title", "description", "narrative", "issuing_department"]
+        fields = ["title", "description", "narrative", "issuing_department", "cert_mailer_config"]
 
 
 class IssuanceForm(forms.Form):
