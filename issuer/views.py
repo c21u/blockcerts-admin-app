@@ -29,8 +29,12 @@ def recursive_namespace_to_dict(obj):
                 obj[key] = obj[key].__dict__
             recursive_namespace_to_dict(obj[key])
 
-# Create your views here.
 
+def send_email(credential, person):
+    mailer_config = credential.cert_mailer_config
+    mailer_config.introduction_url = settings.ISSUER_URL
+    person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
+    introduce.send_email(mailer_config, person_email)
 
 class HomePageView(View):
     def get(self, request):
@@ -53,10 +57,7 @@ class AddPersonView(View):
             person_data['email'] = person_form.cleaned_data['email']
             if not Person.objects.filter(email=person_data['email']).exists():
                 person = self.add_new_person(person_data)
-                mailer_config = credential.cert_mailer_config
-                mailer_config.introduction_url = settings.ISSUER_URL
-                person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
-                introduce.send_email(mailer_config, person_email)
+                send_email(person, credential)
             else:
                 person = Person.objects.get(email=person_data['email'])
             person_issuance, created = PersonIssuances.objects.get_or_create(
@@ -227,10 +228,7 @@ class RemindRecipientsView(generic.DetailView):
         issuance = self.get_object()
 
         for person in people_to_remind:
-            mailer_config_data = CertMailerConfig.objects.all().first()
-            mailer_config = json.loads(mailer_config_data.config, object_hook=lambda d: Namespace(**d))
-            person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': issuance.credential.title}
-            introduce.send_email(mailer_config, person_email)
+            send_email(person, issuance.credential)
 
         return render(request, 'recipients/remind_success.html', {'reminded_count': len(people_to_remind)})
 
