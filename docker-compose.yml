@@ -20,6 +20,7 @@ services:
       DB_PASSWORD: c21u_admin_cert_access
       DEBUG: "True"
       MANDRILL_API_KEY: $MANDRILL_API_KEY
+      SENDGRID_API_KEY: $SENDGRID_API_KEY
       HOSTNAME: admin.127.0.0.1.xip.io
       VIRTUAL_HOST: admin.127.0.0.1.xip.io
       CAS_SERVER_URL: https://casserver.herokuapp.com/cas/
