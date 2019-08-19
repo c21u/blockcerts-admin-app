@@ -87,7 +87,7 @@ class UpdatePersonView(View):
         return HttpResponse('Added public address')
 
     def update_person(self, person):
-        Person.objects.filter(nonce=person['nonce']).update(public_address=person['public_address'])
+        Person.objects.filter(nonce=person['nonce']).update(public_address=person['bitcoinAddress'])
 
 
 class CredentialView(LoginRequiredMixin, View):
