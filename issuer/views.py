@@ -36,6 +36,7 @@ def send_email(credential, person):
     person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
     introduce.send_email(mailer_config, person_email)
 
+
 class HomePageView(View):
     def get(self, request):
         return render(request, 'index.html')
@@ -87,7 +88,7 @@ class UpdatePersonView(View):
         return HttpResponse('Added public address')
 
     def update_person(self, person):
-        Person.objects.filter(nonce=person['nonce']).update(public_address=person['bitcoinAddress'])
+        Person.objects.filter(nonce=person['nonce']).update(public_address=person['bitcoinAddress'], nonce=None)
 
 
 class CredentialView(LoginRequiredMixin, View):

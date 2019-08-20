@@ -51,7 +51,7 @@ class Person(models.Model):
     last_name = models.CharField(max_length=250)
     email = models.EmailField(unique=True)
     public_address = models.CharField(max_length=250, default='')
-    nonce = models.CharField(max_length=50, default='')
+    nonce = models.CharField(max_length=50, blank=True, null=True, unique=True)
     add_issuer_timestamp = models.DateTimeField(auto_now_add=True)
 
 
