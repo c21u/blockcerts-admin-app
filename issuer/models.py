@@ -28,6 +28,9 @@ class Credential(models.Model):
     cert_mailer_config = models.ForeignKey(CertMailerConfig, on_delete=models.CASCADE)
     badge_id = models.TextField(default=get_uuid)
 
+    def __str__(self):
+        return self.title
+
 
 class Issuance(models.Model):
     date_issue = models.DateField()
@@ -45,6 +48,9 @@ class Issuance(models.Model):
     def issued_count(self):
         return self.personissuances_set.filter(is_issued=True).count()
 
+    def __str__(self):
+        return f'{self.credential.title}: {self.date_issue}'
+
 
 class Person(models.Model):
     first_name = models.CharField(max_length=250)
@@ -53,6 +59,9 @@ class Person(models.Model):
     public_address = models.CharField(max_length=250, default='')
     nonce = models.CharField(max_length=50, blank=True, null=True, unique=True)
     add_issuer_timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
 
 
 class CertToolsConfig(models.Model):
