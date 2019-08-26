@@ -143,3 +143,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/tmp/bcadmin'
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME')
+AWS_S3_BUCKET_NAME_STATIC = os.getenv('AWS_S3_BUCKET_NAME_STATIC')
+
+# S3 File Storage
+USE_S3 = os.getenv('USE_S3', False)
+if USE_S3:
+    INSTALLED_APPS.append('django_s3_storage')
+    DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
+    STATICFILES_STORAGE = 'django_s3_storage.storage.StaticS3Storage'

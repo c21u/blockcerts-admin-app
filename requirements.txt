@@ -6,3 +6,4 @@ git+https://github.com/blockchain-certificates/cert-tools@master#egg=cert_tools
 django-bootstrap4>=0.0.8
 django-bootstrap-datepicker-plus>=3.0.5
 django-cas-ng>=3.6.0
+django-s3-storage>=0.12.5
