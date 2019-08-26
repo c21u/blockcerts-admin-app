@@ -194,10 +194,6 @@ class ThankYouView(View):
         return render(request, 'thankyou.html')
 
 
-class IssuancesPageView(generic.ListView):
-    model = Credential
-
-
 class ApproveRecipientsView(generic.DetailView):
     model = Issuance
     template_name = "recipients/approve.html"
