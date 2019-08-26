@@ -30,7 +30,7 @@ def recursive_namespace_to_dict(obj):
             recursive_namespace_to_dict(obj[key])
 
 
-def send_email(credential, person):
+def send_email(person, credential):
     mailer_config = credential.cert_mailer_config
     mailer_config.introduction_url = settings.ISSUER_URL
     person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
