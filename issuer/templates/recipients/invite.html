@@ -19,9 +19,18 @@
 
     <h5>Upload CSV</h5>
     <p>Upload a CSV to invite potential recipients and obtain their public blockchain key. After uploading your CSV, recipients will be sent further instructions via email. <a href="#">Download a CSV template to begin.</a></p>
-    <p><a href="#">file.csv</a></p>
-    <a class="btn btn-primary" href="{% url 'recipients/approve' issuance.pk %}">
-        Upload and get redirected to Approve
-    </a>
-
+    <form action="{% url "upload_csv" %}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+        {% csrf_token %}
+        <div class="form-group">
+            <div class="col-md-8">
+                <input type="file" name="csv_file" id="csv_file" required="True" class="form-control">
+                <input type="hidden" name="issuance_id" id="issuance_id" value="{{ issuance.id }}">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
+                <button class="btn btn-primary"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload</button>
+            </div>
+        </div>
+    </form>
 {% endblock %}
