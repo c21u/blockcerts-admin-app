@@ -1,12 +1,16 @@
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.views import generic, View
 
 from .models import Person, Credential, Issuance, CertToolsConfig, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
 
+import csv
+import io
 import json
 import uuid
 from types import SimpleNamespace as Namespace
@@ -37,6 +41,19 @@ def send_invite(person, credential):
     introduce.send_email(mailer_config, person_email)
 
 
+def add_new_person(person):
+    nonce = uuid.uuid4().hex[:6].upper()
+    while Person.objects.filter(nonce=nonce).exists():
+        nonce = uuid.uuid4().hex[:6].upper()
+    person, created = Person.objects.get_or_create(
+        first_name=person['first_name'],
+        last_name=person['last_name'],
+        email=person['email'],
+        nonce=nonce
+    )
+    return person
+
+
 class HomePageView(View):
     def get(self, request):
         return render(request, 'index.html')
@@ -57,7 +74,7 @@ class AddPersonView(View):
             person_data['last_name'] = person_form.cleaned_data['last_name']
             person_data['email'] = person_form.cleaned_data['email']
             if not Person.objects.filter(email=person_data['email']).exists():
-                person = self.add_new_person(person_data)
+                person = add_new_person(person_data)
                 send_invite(person, credential)
             else:
                 person = Person.objects.get(email=person_data['email'])
@@ -67,18 +84,6 @@ class AddPersonView(View):
             )
             person_form = PersonForm()
             return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
-
-    def add_new_person(self, person):
-        nonce = uuid.uuid4().hex[:6].upper()
-        while Person.objects.filter(nonce=nonce).exists():
-            nonce = uuid.uuid4().hex[:6].upper()
-        person, created = Person.objects.get_or_create(
-            first_name=person['first_name'],
-            last_name=person['last_name'],
-            email=person['email'],
-            nonce=nonce
-        )
-        return person
 
 
 class UpdatePersonView(View):
@@ -194,7 +199,7 @@ class ThankYouView(View):
         return render(request, 'thankyou.html')
 
 
-class ApproveRecipientsView(generic.DetailView):
+class ApproveRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/approve.html"
 
@@ -204,17 +209,17 @@ class ApproveRecipientsView(generic.DetailView):
         return render(request, 'recipients/approve_success.html', {'approved_count': len(people_to_approve)})
 
 
-class CompletedRecipientsView(generic.DetailView):
+class CompletedRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/completed.html"
 
 
-class InviteRecipientsView(generic.DetailView):
+class InviteRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/invite.html"
 
 
-class RemindRecipientsView(generic.DetailView):
+class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/remind.html"
 
@@ -230,6 +235,29 @@ class RemindRecipientsView(generic.DetailView):
         return render(request, 'recipients/remind_success.html', {'reminded_count': len(people_to_remind)})
 
 
-class ManageRecipientsView(generic.ListView):
+class ManageRecipientsView(LoginRequiredMixin, generic.ListView):
     model = Credential
     template_name = "recipients/manage.html"
+
+
+class UploadCsvView(LoginRequiredMixin, View):
+    def post(self, request):
+        csv_file = request.FILES['csv_file']
+        issuance = Issuance.objects.get(id=request.POST.get('issuance_id'))
+        if csv_file.multiple_chunks():
+            messages.error(request, f'Uploaded file is too big ({csv_file.size/(1000*1000)}.2f MB).')
+            return HttpResponseRedirect(reverse('recipients/invite', args=[issuance.id]))
+
+        with io.TextIOWrapper(csv_file, encoding='utf-8') as text_file:
+            reader = csv.DictReader(text_file)
+            for row in reader:
+                if not Person.objects.filter(email=row['email']).exists():
+                    person = add_new_person(row)
+                    send_invite(person, issuance.credential)
+                else:
+                    person = Person.objects.get(email=row['email'])
+                person_issuance, created = PersonIssuances.objects.get_or_create(
+                    person=person,
+                    issuance=issuance
+                )
+            return HttpResponseRedirect(reverse('recipients/approve', args=[issuance.id]))
