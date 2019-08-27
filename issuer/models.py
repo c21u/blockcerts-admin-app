@@ -68,7 +68,13 @@ class Person(models.Model):
 
 
 class CertToolsConfig(models.Model):
-    config = models.TextField()
+    issuer_url = models.URLField()
+    issuer_email = models.EmailField()
+    issuer_name = models.CharField(max_length=250)
+    issuer_id = models.URLField()
+    revocation_list = models.URLField()
+    issuer_public_key = models.CharField(max_length=60)
+    display_html_template = models.TextField()
 
 
 class PersonIssuances(models.Model):
