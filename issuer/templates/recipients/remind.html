@@ -22,15 +22,17 @@
     </thead>
     <tbody>
     {% for person in issuance.people.all %}
-        <tr>
-            <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
-            <td>{{ person.email }}</td>
-            <td>?</td>
-            <td></td>
-            <td>
-                <input type="checkbox" name="people_to_remind" value="{{ person.pk }}" />
-            </td>
-        </tr>
+        {% if not person.public_address %}
+            <tr>
+                <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
+                <td>{{ person.email }}</td>
+                <td>?</td>
+                <td></td>
+                <td>
+                    <input type="checkbox" name="people_to_remind" value="{{ person.pk }}" />
+                </td>
+            </tr>
+        {% endif %}
     {% endfor %}
     </tbody>
     </table>
