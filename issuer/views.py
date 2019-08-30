@@ -223,6 +223,9 @@ class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/remind.html"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(person__public_address__isnull=True)
+
     def post(self, request, *args, **kwargs):
         data = request.POST.copy()
         remind_list = data.getlist('people_to_remind')
