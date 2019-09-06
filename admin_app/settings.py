@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import sentry_sdk
 from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
 
 load_dotenv()
 
@@ -160,3 +162,9 @@ if USE_S3:
     INSTALLED_APPS.append('django_s3_storage')
     DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
     STATICFILES_STORAGE = 'django_s3_storage.storage.StaticS3Storage'
+
+# Sentry Error Reporting
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+sentry_sdk.init(
+        dsn=SENTRY_DSN, integrations=[DjangoIntegration()]
+)
