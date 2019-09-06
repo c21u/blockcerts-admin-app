@@ -73,3 +73,6 @@ class PersonIssuances(models.Model):
     issuance = models.ForeignKey(Issuance, on_delete=models.CASCADE)
     is_issued = models.BooleanField(default=False)
     unsigned_certificate = models.TextField(default='')
+
+    def __str__(self):
+        return f'{self.person}: {self.issuance}'
