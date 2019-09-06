@@ -185,10 +185,10 @@ class UnsignedCertificatesView(View):
                           'identity': person.email}
                 person = Recipient(person)
 
-                person_issuance.unsigned_certificate = create_unsigned_certificates_from_roster(json.loads(issuance.certificate_template),
-                                                                                                [person], False,
-                                                                                                cert_tools_config.additional_per_recipient_fields,
-                                                                                                cert_tools_config.hash_emails)
+                person_issuance.unsigned_certificate = json.dumps(create_unsigned_certificates_from_roster(json.loads(issuance.certificate_template),
+                                                                                                           [person], False,
+                                                                                                           cert_tools_config.additional_per_recipient_fields,
+                                                                                                           cert_tools_config.hash_emails))
                 person_issuance.save()
                 print("Save")
         return HttpResponse("DONE")
