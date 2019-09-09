@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+import json
 import os
 import sentry_sdk
+import requests
 from dotenv import load_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -168,3 +170,25 @@ SENTRY_DSN = os.getenv('SENTRY_DSN')
 sentry_sdk.init(
         dsn=SENTRY_DSN, integrations=[DjangoIntegration()]
 )
+
+# AWS Healthchecks
+EC2_PRIVATE_IP = None
+try:
+    EC2_PRIVATE_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.01).text
+except requests.exceptions.RequestException:
+    pass
+
+if EC2_PRIVATE_IP:
+    ALLOWED_HOSTS.append(EC2_PRIVATE_IP)
+
+ECS_PRIVATE_IP = None
+try:
+    ECS_CONTAINER_METADATA_URI = os.getenv('ECS_CONTAINER_METADATA_URI')
+    if ECS_CONTAINER_METADATA_URI:
+        ecs_task_metadata = json.loads(requests.get(ECS_CONTAINER_METADATA_URI))
+        for container in ecs_task_metadata['Containers']:
+            for network in container['Networks']:
+                if network['NetworkMode'] == 'awsvpc':
+                    ALLOWED_HOSTS += network['IPv4Addresses']
+except requests.exceptions.RequestException:
+    pass
