@@ -145,8 +145,8 @@ class IssuanceView(LoginRequiredMixin, View):
         linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
         substitutions = {'title': linked_credential.title, 'narrative': linked_credential.narrative,
-                         'issuing_department': linked_credential.issuing_department,
-                         'date_issue': issuance.date_issue.strftime("%b %d, %Y"), 'badge_id': linked_credential.badge_id}
+                         'description': linked_credential.description, 'issuing_department': linked_credential.issuing_department,
+                         'badge_id': linked_credential.badge_id}
         cert_tools_config_data = CertToolsConfig.objects.all().first()
         cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
         cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
@@ -183,12 +183,18 @@ class UnsignedCertificatesView(View):
                 issuance = Issuance.objects.get(id=person_issuance.issuance.id)
                 person = {'name': person.first_name + ' ' + person.last_name, 'pubkey': "ecdsa-koblitz-pubkey:" + person.public_address,
                           'identity': person.email}
+                date_issue = datetime.now().strftime("%B %d, %Y")
+                template = json.loads(Template(issuance.certificate_template).safe_substitute(name=person['name'], date_issue=date_issue))
                 person = Recipient(person)
 
-                person_issuance.unsigned_certificate = json.dumps(create_unsigned_certificates_from_roster(json.loads(issuance.certificate_template),
-                                                                                                           [person], False,
-                                                                                                           cert_tools_config.additional_per_recipient_fields,
-                                                                                                           cert_tools_config.hash_emails))
+                usc = create_unsigned_certificates_from_roster(template,
+                                                               [person], False,
+                                                               cert_tools_config.additional_per_recipient_fields,
+                                                               cert_tools_config.hash_emails)
+                for uid in usc.keys():
+                    usc[uid]['id'] = settings.VIEW_URL.format(uid)
+
+                person_issuance.unsigned_certificate = json.dumps(usc)
                 person_issuance.save()
                 print("Save")
         return HttpResponse("DONE")

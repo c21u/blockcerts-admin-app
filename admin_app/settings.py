@@ -70,7 +70,8 @@ AUTHENTICATION_BACKENDS = [
 CAS_SERVER_URL = os.getenv('CAS_SERVER_URL', 'https://login.example.com/cas')
 
 ISSUER_URL = os.getenv('ISSUER_URL', 'https://issuer.example.com')
-CERT_URL = os.getenv('ISSUER_URL', 'https://certs.example.com/{}')
+CERT_URL = os.getenv('CERT_URL', 'https://certs.example.com/{}')
+VIEW_URL = os.getenv('VIEW_URL', 'https://view.example.com/{}')
 
 ROOT_URLCONF = 'admin_app.urls'
 
