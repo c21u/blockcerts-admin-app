@@ -69,6 +69,8 @@ AUTHENTICATION_BACKENDS = [
     'issuer.backends.CASAdminOnlyBackend',
 ]
 
+INSTITUTION_NAME = os.getenv('INSTITUTION_NAME', 'Example University')
+
 CAS_SERVER_URL = os.getenv('CAS_SERVER_URL', 'https://login.example.com/cas')
 
 ISSUER_URL = os.getenv('ISSUER_URL', 'https://issuer.example.com')
