@@ -62,7 +62,7 @@ class HomePageView(View):
 class AddPersonView(View):
     def get(self, request, issuance_id=None):
         person_form = PersonForm()
-        return render(request, 'add_person.html', {'form': person_form, 'person_added': False})
+        return render(request, 'add_person.html', {'form': person_form, 'person_added': False, 'INSTITUTION_NAME': settings.INSTITUTION_NAME})
 
     def post(self, request, issuance_id=None):
         person_form = PersonForm(request.POST)
@@ -83,7 +83,7 @@ class AddPersonView(View):
                 issuance=issuance
             )
             person_form = PersonForm()
-            return render(request, 'add_person.html', {'form': person_form, 'person_added': True})
+            return render(request, 'add_person.html', {'form': person_form, 'person_added': True, 'INSTITUTION_NAME': settings.INSTITUTION_NAME})
 
 
 class UpdatePersonView(View):

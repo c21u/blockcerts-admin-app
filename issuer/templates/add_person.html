@@ -5,10 +5,12 @@
 {% block body_block %}
     <div class="container">
         {% if person_added %}
-        <p class="pt-2">Thanks for registering!</p>
+        <p class="pt-2">Thank you for providing your information. {{ INSTITUTION_NAME }} will send you an email with instructions on how to get started.</p>
         {% else %}
         <div class="row pt-2">
             <div class='col-sm-6'>
+                <p class="pt-2">{{ INSTITUTION_NAME }} would like to recognize your achievement with a <a href="https://blockcerts.org">Blockcerts</a>
+                digital credential. Complete the form below to receive an email with instructions on how to get started.</p>
                 <form id="person-form" method="post">
                     {% csrf_token %}
                     {% bootstrap_form form %}
