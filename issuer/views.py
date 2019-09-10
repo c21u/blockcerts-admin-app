@@ -179,7 +179,6 @@ class UnsignedCertificatesView(View):
         for person_issuance in PersonIssuances.objects.filter(is_issued=False):
             person = Person.objects.get(id=person_issuance.person.id)
             if person.public_address != '':
-                print(person.id)
                 issuance = Issuance.objects.get(id=person_issuance.issuance.id)
                 person = {'name': person.first_name + ' ' + person.last_name, 'pubkey': "ecdsa-koblitz-pubkey:" + person.public_address,
                           'identity': person.email}
@@ -196,7 +195,6 @@ class UnsignedCertificatesView(View):
 
                 person_issuance.unsigned_certificate = json.dumps(usc)
                 person_issuance.save()
-                print("Save")
         return HttpResponse("DONE")
 
 
