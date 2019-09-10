@@ -189,10 +189,8 @@ try:
     ECS_CONTAINER_METADATA_URI = os.getenv('ECS_CONTAINER_METADATA_URI')
     if ECS_CONTAINER_METADATA_URI:
         ecs_task_metadata = json.loads(requests.get(ECS_CONTAINER_METADATA_URI).text)
-        print(ecs_task_metadata)
-        #for container in ecs_task_metadata['Containers']:
-        #    for network in container['Networks']:
-        #        if network['NetworkMode'] == 'awsvpc':
-        #            ALLOWED_HOSTS += network['IPv4Addresses']
+        for network in ecs_task_metadata['Networks']:
+            if network['NetworkMode'] == 'awsvpc':
+                ALLOWED_HOSTS += network['IPv4Addresses']
 except requests.exceptions.RequestException:
     pass
