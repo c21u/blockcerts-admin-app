@@ -54,8 +54,10 @@ class Issuance(models.Model):
 
 
 class Person(models.Model):
+    class Meta:
+        ordering = ('last_name',)
     first_name = models.CharField(max_length=250)
-    last_name = models.CharField(max_length=250)
+    last_name = models.CharField(db_index=True, max_length=250)
     email = models.EmailField(unique=True)
     public_address = models.CharField(max_length=250, default='')
     nonce = models.CharField(max_length=50, blank=True, null=True, unique=True)
@@ -70,6 +72,8 @@ class CertToolsConfig(models.Model):
 
 
 class PersonIssuances(models.Model):
+    class Meta:
+        ordering = ('person__last_name',)
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     issuance = models.ForeignKey(Issuance, on_delete=models.CASCADE)
     is_issued = models.BooleanField(default=False)
