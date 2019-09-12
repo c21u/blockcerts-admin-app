@@ -13,7 +13,7 @@
                     Invite
                 </a> |
                 <a
-                    class="btn btn-link {% if issuance.ready_count == 0 %}disabled{% endif %}"
+                    class="btn btn-link {% if not issuance.people.exists %}disabled{% endif %}"
                     href="{% url 'recipients/approve' issuance.pk %}">
                     Approve
                 </a> |
