@@ -31,7 +31,7 @@ from issuer.views import (HomePageView,
                           CompletedRecipientsView,
                           InviteRecipientsView,
                           RemindRecipientsView,
-                          ManageRecipientsView,
+                          ManageCredentialsView,
                           UploadCsvView)
 
 urlpatterns = [
@@ -41,7 +41,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', HomePageView.as_view()),
     url(r'^(?P<issuance_id>\w+)/add_person/', csrf_exempt(AddPersonView.as_view())),
-    url(r'^credential/(?P<id>\d+)', csrf_exempt(UpdateCredentialView.as_view())),
+    url(r'^credential/(?P<id>\d+)', csrf_exempt(UpdateCredentialView.as_view()), name='manage_credential'),
     url(r'^update_person/', csrf_exempt(UpdatePersonView.as_view())),
     url(r'^add_credential/', csrf_exempt(CredentialView.as_view())),
     url(r'^add_issuance/', csrf_exempt(IssuanceView.as_view())),
@@ -51,6 +51,6 @@ urlpatterns = [
     url(r'^manage_recipients/(?P<pk>\w+)/completed', CompletedRecipientsView.as_view(), name='recipients/completed'),
     url(r'^manage_recipients/(?P<pk>\w+)/invite', InviteRecipientsView.as_view(), name='recipients/invite'),
     url(r'^manage_recipients/(?P<pk>\w+)/remind', RemindRecipientsView.as_view(), name='recipients/remind'),
-    url(r'^manage_recipients/', ManageRecipientsView.as_view(), name='recipients/manage'),
+    url(r'^manage_credentials/', ManageCredentialsView.as_view(), name='credentials/manage'),
     url(r'^upload/csv/$', UploadCsvView.as_view(), name='upload_csv')
 ]
