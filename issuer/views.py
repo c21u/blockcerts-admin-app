@@ -66,6 +66,7 @@ class AddPersonView(View):
 
     def post(self, request, issuance_id=None):
         person_form = PersonForm(request.POST)
+        person_was_added = False
         if person_form.is_valid():
             person_data = {}
             issuance = Issuance.objects.get(url_id=issuance_id)
@@ -83,7 +84,8 @@ class AddPersonView(View):
                 issuance=issuance
             )
             person_form = PersonForm()
-            return render(request, 'add_person.html', {'form': person_form, 'person_added': True, 'INSTITUTION_NAME': settings.INSTITUTION_NAME})
+            person_was_added = True
+        return render(request, 'add_person.html', {'form': person_form, 'person_added': person_was_added, 'INSTITUTION_NAME': settings.INSTITUTION_NAME})
 
 
 class UpdatePersonView(View):
