@@ -178,25 +178,25 @@ class UnsignedCertificatesView(View):
         cert_tools_config_data = CertToolsConfig.objects.all().first()
         cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
         recursive_namespace_to_dict(cert_tools_config.additional_global_fields)
-        for person_issuance in PersonIssuances.objects.filter(is_issued=False):
-            person = Person.objects.get(id=person_issuance.person.id)
-            if person.public_address != '':
-                issuance = Issuance.objects.get(id=person_issuance.issuance.id)
-                person = {'name': person.first_name + ' ' + person.last_name, 'pubkey': "ecdsa-koblitz-pubkey:" + person.public_address,
-                          'identity': person.email}
-                date_issue = datetime.now().strftime("%B %d, %Y")
-                template = json.loads(Template(issuance.certificate_template).safe_substitute(name=person['name'], date_issue=date_issue))
-                person = Recipient(person)
+        for person_issuance in PersonIssuances.objects.filter(is_issued=False, is_approved=True).exclude(person__public_address=''):
+            issuance = Issuance.objects.get(id=person_issuance.issuance.id)
+            person = {
+                      'name': f'{person_issuance.person.first_name} {person_issuance.person.last_name}',
+                      'pubkey': f'ecdsa-koblitz-pubkey: {person_issuance.person.public_address}',
+                      'identity': person_issuance.person.email}
+            date_issue = datetime.now().strftime("%B %d, %Y")
+            template = json.loads(Template(issuance.certificate_template).safe_substitute(name=person['name'], date_issue=date_issue))
+            person = Recipient(person)
 
-                usc = create_unsigned_certificates_from_roster(template,
-                                                               [person], False,
-                                                               cert_tools_config.additional_per_recipient_fields,
-                                                               cert_tools_config.hash_emails)
-                for uid in usc.keys():
-                    usc[uid]['id'] = settings.VIEW_URL.format(uid)
+            usc = create_unsigned_certificates_from_roster(template,
+                                                           [person], False,
+                                                           cert_tools_config.additional_per_recipient_fields,
+                                                           cert_tools_config.hash_emails)
+            for uid in usc.keys():
+                usc[uid]['id'] = settings.VIEW_URL.format(uid)
 
-                person_issuance.unsigned_certificate = json.dumps(usc)
-                person_issuance.save()
+            person_issuance.unsigned_certificate = json.dumps(usc)
+            person_issuance.save()
         return HttpResponse("DONE")
 
 
@@ -212,6 +212,7 @@ class ApproveRecipientsView(LoginRequiredMixin, generic.DetailView):
     def post(self, request, *args, **kwargs):
         data = request.POST.copy()
         people_to_approve = data.getlist('people_to_approve')
+        PersonIssuances.objects.filter(id__in=people_to_approve).update(is_approved=True)
         return render(request, 'recipients/approve_success.html', {'approved_count': len(people_to_approve)})
 
 
@@ -262,8 +263,10 @@ class UploadCsvView(LoginRequiredMixin, View):
                     send_invite(person, issuance.credential)
                 else:
                     person = Person.objects.get(email=row['email'])
+                approved = 'approved' in row and bool(row['approved'])
                 person_issuance, created = PersonIssuances.objects.get_or_create(
                     person=person,
-                    issuance=issuance
+                    issuance=issuance,
+                    is_approved=approved
                 )
             return HttpResponseRedirect(reverse('recipients/approve', args=[issuance.id]))
