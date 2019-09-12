@@ -73,6 +73,7 @@ class PersonIssuances(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     issuance = models.ForeignKey(Issuance, on_delete=models.CASCADE)
     is_issued = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     unsigned_certificate = models.TextField(default='')
     last_reminded_at = models.DateTimeField(default=timezone.now)
 

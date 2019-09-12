@@ -16,17 +16,17 @@
         </tr>
     </thead>
     <tbody>
-    {% for person in issuance.people.all %}
+    {% for pi in issuance.personissuances_set.all %}
         <tr>
-            <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
-            <td>{{ person.email }}</td>
+            <th scope="row">{{ pi.person.last_name }}, {{ pi.person.first_name }}</th>
+            <td>{{ pi.person.email }}</td>
             <td>
-                {% if person.public_address %}
+                {% if pi.person.public_address %}
                     <span class="badge badge-pill badge-success">Has public address</span>
                 {% endif %}
             </td>
             <td>
-                <input type="checkbox" name="people_to_approve" value="{{ person.pk }}" />
+                <input type="checkbox" name="people_to_approve" value="{{ pi.id }}" {% if pi.is_approved %}checked disabled{% endif %} />
             </td>
         </tr>
     {% endfor %}
