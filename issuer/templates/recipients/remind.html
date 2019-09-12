@@ -21,15 +21,15 @@
         </tr>
     </thead>
     <tbody>
-    {% for person in issuance.people.all %}
-        {% if not person.public_address %}
+    {% for pi in issuance.personissuances_set.all %}
+        {% if not pi.person.public_address %}
             <tr>
-                <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
-                <td>{{ person.email }}</td>
+                <th scope="row">{{ pi.person.last_name }}, {{ pi.person.first_name }}</th>
+                <td>{{ pi.person.email }}</td>
                 <td>?</td>
-                <td></td>
+                <td>{{ pi.last_reminded_at }}</td>
                 <td>
-                    <input type="checkbox" name="people_to_remind" value="{{ person.pk }}" />
+                    <input type="checkbox" name="people_to_remind" value="{{ pi.person.pk }}" />
                 </td>
             </tr>
         {% endif %}
