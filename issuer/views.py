@@ -5,8 +5,9 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic, View
+from django.utils.html import strip_tags
 
-from .models import Person, Credential, Issuance, CertToolsConfig, PersonIssuances
+from .models import Person, Credential, Issuance, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
 
 import csv
@@ -22,17 +23,37 @@ from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsign
 from datetime import datetime
 
 
-def recursive_namespace_to_dict(obj):
-    if isinstance(obj, list):
-        for i in range(len(obj)):
-            if isinstance(obj[i], Namespace):
-                obj[i] = obj[i].__dict__
-            recursive_namespace_to_dict(obj[i])
-    if isinstance(obj, dict):
-        for key in obj:
-            if isinstance(obj[key], Namespace):
-                obj[key] = obj[key].__dict__
-            recursive_namespace_to_dict(obj[key])
+def get_unsigned_credential(cert_tools_config, credential, person):
+    template = Namespace()
+    template.issuer_url = cert_tools_config.issuer_url
+    template.issuer_email = cert_tools_config.issuer_email
+    template.issuer_name = cert_tools_config.issuer_name
+    template.issuer_id = cert_tools_config.issuer_id
+    template.revocation_list = cert_tools_config.revocation_list
+    template.public_key = cert_tools_config.public_key
+    template.certificate_title = strip_tags(credential.title)
+    template.certificate_description = strip_tags(credential.description)
+    template.certificate_narrative = strip_tags(credential.narrative)
+    template.badge_id = credential.badge_id
+    displayHtml = Template(cert_tools_config.display_html_template).safe_substitute(name=person['name'],
+                                                                                    date_issue=datetime.now().strftime("%B %d, %Y"),
+                                                                                    description=credential.description,
+                                                                                    issuing_department=credential.issuing_department,
+                                                                                    narrative=credential.narrative)
+    template.additional_global_fields = ('{"fields": [{"path": "$.displayHtml","value": "'
+                                         f'{displayHtml}'
+                                         '},{"path": "$.@context","value": ["https://w3id.org/openbadges/v2", "https://w3id.org/blockcerts/v2",'
+                                         '{"displayHtml": { "@id": "https://schemas.learningmachine.com/2017/blockcerts/displayHtml",'
+                                         '"@type": "https://schemas.learningmachine.com/2017/types/text/html" }}]}]}')
+    template.issuer_logo_file = 'images/issuer-logo.png'
+    template.cert_image_file = 'images/cert-image.png'
+    template.data_dir = 'data'
+    template = create_certificate_template(template)
+    usc = create_unsigned_certificates_from_roster(template, [person], False, None, False)
+    for uid in usc.keys():
+        usc[uid]['id'] = settings.VIEW_URL.format(uid)
+
+    return usc
 
 
 def send_invite(person, credential):
@@ -154,18 +175,7 @@ class IssuanceView(LoginRequiredMixin, View):
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
         issuance = self.add_issuance(issuance_data)
         issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.url_id) + '/add_person/'
-        linked_credential = Credential.objects.get(id=issuance_data['credential_id'])
 
-        substitutions = {'title': linked_credential.title, 'narrative': linked_credential.narrative,
-                         'description': linked_credential.description, 'issuing_department': linked_credential.issuing_department,
-                         'badge_id': linked_credential.badge_id}
-        cert_tools_config_data = CertToolsConfig.objects.all().first()
-        cert_tools_config_data.config = Template(cert_tools_config_data.config).safe_substitute(substitutions)
-        cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
-        recursive_namespace_to_dict(cert_tools_config.additional_global_fields)
-
-        certificate_template = create_certificate_template(cert_tools_config)
-        issuance.certificate_template = json.dumps(certificate_template)
         issuance.save()
         issuance_form = IssuanceForm()
         return render(request, 'add_issuance.html', {'form': issuance_form, 'issuance_url': issuance_url})
@@ -185,26 +195,15 @@ class IssuanceView(LoginRequiredMixin, View):
 
 class UnsignedCertificatesView(View):
     def post(self, request):
-        cert_tools_config_data = CertToolsConfig.objects.all().first()
-        cert_tools_config = json.loads(cert_tools_config_data.config, object_hook=lambda d: Namespace(**d))
-        recursive_namespace_to_dict(cert_tools_config.additional_global_fields)
         for person_issuance in PersonIssuances.objects.filter(is_issued=False, is_approved=True).exclude(person__public_address=''):
             issuance = Issuance.objects.get(id=person_issuance.issuance.id)
             person = {
                       'name': f'{person_issuance.person.first_name} {person_issuance.person.last_name}',
                       'pubkey': f'ecdsa-koblitz-pubkey: {person_issuance.person.public_address}',
                       'identity': person_issuance.person.email}
-            date_issue = datetime.now().strftime("%B %d, %Y")
-            template = json.loads(Template(issuance.certificate_template).safe_substitute(name=person['name'], date_issue=date_issue))
+
             person = Recipient(person)
-
-            usc = create_unsigned_certificates_from_roster(template,
-                                                           [person], False,
-                                                           cert_tools_config.additional_per_recipient_fields,
-                                                           cert_tools_config.hash_emails)
-            for uid in usc.keys():
-                usc[uid]['id'] = settings.VIEW_URL.format(uid)
-
+            usc = get_unsigned_credential(issuance.cert_tools_config, issuance.credential, person)
             person_issuance.unsigned_certificate = json.dumps(usc)
             person_issuance.save()
         return HttpResponse("DONE")
