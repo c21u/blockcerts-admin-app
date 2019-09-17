@@ -242,9 +242,9 @@ class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
         return render(request, 'recipients/remind_success.html', {'reminded_count': len(people_to_remind)})
 
 
-class ManageRecipientsView(LoginRequiredMixin, generic.ListView):
+class ManageCredentialsView(LoginRequiredMixin, generic.ListView):
     model = Credential
-    template_name = "recipients/manage.html"
+    template_name = "manageCredentials.html"
 
 
 class UploadCsvView(LoginRequiredMixin, View):
