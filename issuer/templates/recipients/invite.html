@@ -1,4 +1,5 @@
 {% extends 'header.html' %}
+{% load staticfiles%}
 {% block body_block %}
     <h1>Manage Recipients - Invite</h1>
     <h3>{{ issuance.credential.title }}</h3>
@@ -18,7 +19,7 @@
     <br />
 
     <h5>Upload CSV</h5>
-    <p>Upload a CSV to invite potential recipients and obtain their public blockchain key. After uploading your CSV, recipients will be sent further instructions via email. <a href="#">Download a CSV template to begin.</a></p>
+    <p>Upload a CSV to invite potential recipients and obtain their public blockchain key. After uploading your CSV, recipients will be sent further instructions via email. <a href="{% static 'users.csv' %}">Download a CSV template to begin.</a></p>
     <form action="{% url "upload_csv" %}" method="POST" enctype="multipart/form-data" class="form-horizontal">
         {% csrf_token %}
         <div class="form-group">
