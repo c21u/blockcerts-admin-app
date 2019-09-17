@@ -13,6 +13,7 @@ from .forms import PersonForm, CredentialForm, IssuanceForm
 import csv
 import io
 import json
+import os
 import uuid
 import concurrent.futures
 from types import SimpleNamespace as Namespace
@@ -23,31 +24,44 @@ from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsign
 from datetime import datetime
 
 
-def get_unsigned_credential(cert_tools_config, credential, person):
+def get_unsigned_credential(credential, person):
+    cert_tools_config = credential.cert_tools_config
     template = Namespace()
     template.issuer_url = cert_tools_config.issuer_url
     template.issuer_email = cert_tools_config.issuer_email
     template.issuer_name = cert_tools_config.issuer_name
     template.issuer_id = cert_tools_config.issuer_id
     template.revocation_list = cert_tools_config.revocation_list
-    template.public_key = cert_tools_config.public_key
+    template.issuer_public_key = cert_tools_config.issuer_public_key
     template.certificate_title = strip_tags(credential.title)
     template.certificate_description = strip_tags(credential.description)
-    template.certificate_narrative = strip_tags(credential.narrative)
+    template.criteria_narrative = strip_tags(credential.narrative)
     template.badge_id = credential.badge_id
-    displayHtml = Template(cert_tools_config.display_html_template).safe_substitute(name=person['name'],
-                                                                                    date_issue=datetime.now().strftime("%B %d, %Y"),
-                                                                                    description=credential.description,
-                                                                                    issuing_department=credential.issuing_department,
-                                                                                    narrative=credential.narrative)
-    template.additional_global_fields = ('{"fields": [{"path": "$.displayHtml","value": "'
-                                         f'{displayHtml}'
-                                         '},{"path": "$.@context","value": ["https://w3id.org/openbadges/v2", "https://w3id.org/blockcerts/v2",'
-                                         '{"displayHtml": { "@id": "https://schemas.learningmachine.com/2017/blockcerts/displayHtml",'
-                                         '"@type": "https://schemas.learningmachine.com/2017/types/text/html" }}]}]}')
+    template.issuer_signature_lines = None
+    template.hash_emails = False
+    template.additional_per_recipient_fields = None
+    template.display_html = Template(cert_tools_config.display_html_template).safe_substitute(name=person.name,
+                                                                                              date_issue=datetime.now().strftime("%B %d, %Y"),
+                                                                                              description=credential.description,
+                                                                                              issuing_department=credential.issuing_department,
+                                                                                              narrative=credential.narrative)
+    template.additional_global_fields = [{
+        "path": "$.displayHtml",
+        "value": template.display_html
+        }, {
+            "path": "$.@context",
+            "value": [
+                "https://w3id.org/openbadges/v2",
+                "https://w3id.org/blockcerts/v2",
+                {"displayHtml": {
+                    "@id": "https://schemas.learningmachine.com/2017/blockcerts/displayHtml",
+                    "@type": "https://schemas.learningmachine.com/2017/types/text/html"
+                    }}
+                ]
+            }]
     template.issuer_logo_file = 'images/issuer-logo.png'
     template.cert_image_file = 'images/cert-image.png'
-    template.data_dir = 'data'
+    template.abs_data_dir = os.path.abspath(os.path.join(os.getcwd(), 'data'))
     template = create_certificate_template(template)
     usc = create_unsigned_certificates_from_roster(template, [person], False, None, False)
     for uid in usc.keys():
@@ -203,7 +217,7 @@ class UnsignedCertificatesView(View):
                       'identity': person_issuance.person.email}
 
             person = Recipient(person)
-            usc = get_unsigned_credential(issuance.cert_tools_config, issuance.credential, person)
+            usc = get_unsigned_credential(issuance.credential, person)
             person_issuance.unsigned_certificate = json.dumps(usc)
             person_issuance.save()
         return HttpResponse("DONE")
