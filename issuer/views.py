@@ -13,6 +13,7 @@ import csv
 import io
 import json
 import uuid
+import concurrent.futures
 from types import SimpleNamespace as Namespace
 from cert_mailer import introduce
 from string import Template
@@ -39,6 +40,15 @@ def send_invite(person, credential):
     mailer_config.introduction_url = settings.ISSUER_URL
     person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
     introduce.send_email(mailer_config, person_email)
+
+
+def send_invites(people, credential):
+    if len(people) > 0:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+            def cred_gen():
+                for n in range(len(people)):
+                    yield credential
+            executor.map(send_invite, people, cred_gen())
 
 
 def add_new_person(person):
@@ -235,10 +245,7 @@ class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
         remind_list = data.getlist('people_to_remind')
         people_to_remind = Person.objects.filter(pk__in=remind_list)
         issuance = self.get_object()
-
-        for person in people_to_remind:
-            send_invite(person, issuance.credential)
-
+        send_invites(people_to_remind, issuance.credential)
         return render(request, 'recipients/remind_success.html', {'reminded_count': len(people_to_remind)})
 
 
@@ -255,12 +262,13 @@ class UploadCsvView(LoginRequiredMixin, View):
             messages.error(request, f'Uploaded file is too big ({csv_file.size/(1000*1000)}.2f MB).')
             return HttpResponseRedirect(reverse('recipients/invite', args=[issuance.id]))
 
+        people_to_invite = []
         with io.TextIOWrapper(csv_file, encoding='utf-8') as text_file:
             reader = csv.DictReader(text_file)
             for row in reader:
                 if not Person.objects.filter(email=row['email']).exists():
                     person = add_new_person(row)
-                    send_invite(person, issuance.credential)
+                    people_to_invite.append(person)
                 else:
                     person = Person.objects.get(email=row['email'])
                 approved = 'approved' in row and bool(row['approved'])
@@ -269,4 +277,5 @@ class UploadCsvView(LoginRequiredMixin, View):
                     issuance=issuance,
                     is_approved=approved
                 )
-            return HttpResponseRedirect(reverse('recipients/approve', args=[issuance.id]))
+        send_invites(people_to_invite, issuance.credential)
+        return HttpResponseRedirect(reverse('recipients/approve', args=[issuance.id]))
