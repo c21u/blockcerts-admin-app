@@ -42,6 +42,7 @@ def create_cert_tools_config():
         display_html_template=("<div style='font-family:Helvetica, sans-serif;'><h1>$title</h1><h2>ISSUED TO $name</h2>"
                                "<h2>ISSUED ON $date_issue</h2><h3>DESCRIPTION</h3><p>$description</p><h3>ISSUER</h3><p>$issuing_department</p></div>")
     )
+    cert_tools_config.save()
     return cert_tools_config
 
 
