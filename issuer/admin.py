@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Person, Credential, Issuance, CertMailerConfig, PersonIssuances
+from .models import Person, Credential, Issuance, CertMailerConfig, CertToolsConfig, PersonIssuances
 
 
 class PersonIssuancesInline(admin.TabularInline):
@@ -20,4 +20,5 @@ admin.site.register(Person, PersonAdmin)
 admin.site.register(Credential)
 admin.site.register(Issuance)
 admin.site.register(CertMailerConfig)
+admin.site.register(CertToolsConfig)
 admin.site.register(PersonIssuances)

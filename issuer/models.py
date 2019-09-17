@@ -8,6 +8,20 @@ def get_uuid():
     return str(uuid4())
 
 
+class CertToolsConfig(models.Model):
+    name = models.CharField(max_length=50)
+    issuer_url = models.URLField()
+    issuer_email = models.EmailField()
+    issuer_name = models.CharField(max_length=250)
+    issuer_id = models.URLField()
+    revocation_list = models.URLField()
+    issuer_public_key = models.CharField(max_length=60)
+    display_html_template = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 class CertMailerConfig(models.Model):
     name = models.CharField(max_length=50)
     mailer = models.CharField(max_length=50, choices=(("stdout", "Log instead of mailing"), ("mandrill", "Mailchimp Mandrill"), ("sendgrid", "Sendgrid")))
@@ -27,6 +41,7 @@ class Credential(models.Model):
     narrative = models.TextField()
     issuing_department = models.CharField(max_length=50)
     cert_mailer_config = models.ForeignKey(CertMailerConfig, on_delete=models.CASCADE)
+    cert_tools_config = models.ForeignKey(CertToolsConfig, on_delete=models.CASCADE)
     badge_id = models.TextField(default=get_uuid)
 
     def __str__(self):
@@ -35,7 +50,6 @@ class Credential(models.Model):
 
 class Issuance(models.Model):
     date_issue = models.DateField()
-    certificate_template = models.TextField(default='')
     url_id = models.TextField(default='')
     credential = models.ForeignKey(Credential, on_delete=models.CASCADE)
     people = models.ManyToManyField('Person', through='PersonIssuances', related_name='issuance')
@@ -65,10 +79,6 @@ class Person(models.Model):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-
-
-class CertToolsConfig(models.Model):
-    config = models.TextField()
 
 
 class PersonIssuances(models.Model):
