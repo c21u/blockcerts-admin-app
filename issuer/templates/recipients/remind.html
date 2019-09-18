@@ -17,6 +17,7 @@
         <th scope="col">Email</th>
         <th scope="col">Status</th>
         <th scope="col">Last reminded</th>
+        <th scope="col">One Time Code</th>
         <th scope="col">Remind</th>
         </tr>
     </thead>
@@ -28,6 +29,7 @@
                 <td>{{ pi.person.email }}</td>
                 <td>?</td>
                 <td>{{ pi.last_reminded_at }}</td>
+                <td>{{ pi.person.nonce }}</td>
                 <td>
                     <input type="checkbox" name="people_to_remind" value="{{ pi.person.pk }}" />
                 </td>
