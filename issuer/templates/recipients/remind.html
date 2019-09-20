@@ -4,10 +4,11 @@
     <h3>{{ issuance.credential.title }}</h3>
     <h4>{{ issuance.date_issue }}</h4>
     <p>
-        The following have been invited to qualify for this credential, but they
-        have not yet added Georgia Tech as an issuer in their Blockcerts
+        The following {{ issuance.unready_count }} people have been invited to qualify for this credential, but they
+        have not yet added {{ institution_name }} as an issuer in their Blockcerts
         application. Select "Remind" to send a reminder email with instructions.
     </p>
+    <p>Currently, {{ approved_count }} are approved to receive the credential and {{ unapproved_count }} are not.</p>
     <form method="post" novalidate>
     {% csrf_token %}
     <table class="table">
