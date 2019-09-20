@@ -1,4 +1,4 @@
-const casServerUrl = "https://casserver.herokuapp.com/cas/login";
+const casServerUrl = Cypress.env("CAS_SERVER_URL");
 
 Cypress.Commands.add("login", () => {
   cy.request(casServerUrl).then(response => {
@@ -12,8 +12,8 @@ Cypress.Commands.add("login", () => {
       form: true,
       body: {
         execution: inputElement["value"],
-        username: "casuser",
-        password: "Mellon",
+        username: Cypress.env("CAS_USERNAME"),
+        password: Cypress.env("CAS_PASSWORD"),
         _eventId: "submit"
       }
     });
