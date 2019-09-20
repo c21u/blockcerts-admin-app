@@ -22,6 +22,7 @@ from string import Template
 from cert_tools.create_v2_certificate_template import create_certificate_template
 from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsigned_certificates_from_roster
 from datetime import datetime
+from itertools import repeat
 
 
 def get_unsigned_credential(credential, person):
@@ -70,20 +71,20 @@ def get_unsigned_credential(credential, person):
     return usc
 
 
-def send_invite(person, credential):
+def send_invite(person, credential, is_reminder=False):
     mailer_config = credential.cert_mailer_config
     mailer_config.introduction_url = settings.ISSUER_URL
+    if is_reminder:
+        mailer_config.introduction_email_subject = mailer_config.remind_email_subject
+        mailer_config.introduction_email_body = mailer_config.remind_email_body
     person_email = {'first_name': person.first_name, 'email': person.email, 'nonce': person.nonce, 'title': credential.title}
     introduce.send_email(mailer_config, person_email)
 
 
-def send_invites(people, credential):
+def send_invites(people, credential, is_reminder=False):
     if len(people) > 0:
         with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
-            def cred_gen():
-                for n in range(len(people)):
-                    yield credential
-            executor.map(send_invite, people, cred_gen())
+            executor.map(send_invite, people, repeat(credential), repeat(is_reminder))
 
 
 def add_new_person(person):
@@ -258,7 +259,7 @@ class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
         remind_list = data.getlist('people_to_remind')
         people_to_remind = Person.objects.filter(pk__in=remind_list)
         issuance = self.get_object()
-        send_invites(people_to_remind, issuance.credential)
+        send_invites(people_to_remind, issuance.credential, True)
         return render(request, 'recipients/remind_success.html', {'reminded_count': len(people_to_remind)})
 
 
