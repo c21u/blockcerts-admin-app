@@ -1,57 +1,26 @@
-const casServerUrl = "https://casserver.herokuapp.com/cas/login";
-
-describe("TODO tests", () => {
+describe("Basic UI", () => {
+  before(() => {
+    // log in only once before any of the tests run.
+    cy.login();
+  })
   beforeEach(() => {
+    // before each test, we can automatically preserve certain cookies,
+    // so they will not be cleared before the next test starts.
     Cypress.Cookies.preserveOnce("csrftoken", "messages", "sessionid");
   });
 
-  it("TODO should do something", () => {
-    const firstRequest = {
-      method: "GET",
-      url: casServerUrl
-    };
-
-    const secondRequest = {
-      method: "POST",
-      url: casServerUrl,
-      qs: {
-        service:
-          "http://admin.127.0.0.1.xip.io/accounts/login?next=%2Fmanage_credentials%2F"
-      },
-      followRedirect: true,
-      form: true,
-      body: {
-        username: "casuser",
-        password: "Mellon",
-        _eventId: "submit"
-      }
-    };
-
-    cy.request(firstRequest)
-      .then(response => {
-        expect(response.status).to.eq(200)
-
-        const parser = new DOMParser();
-        const html = parser.parseFromString(response.body, "text/html");
-        const inputElements = html.querySelectorAll("input[name='execution']");
-
-        if (inputElements && inputElements[0] && inputElements[0]["value"]) {
-          secondRequest.body.execution = inputElements[0]["value"];
-        }
-      })
-      .then(() => {
-        cy.request(secondRequest).then(response => {
-          cy.getCookies().then(cookies => console.dir(cookies));
-          cy.visit("/");
-        });
-      });
+  it("Should find form element at /add_credential", () => {
+    cy.visit("/add_credential");
+    cy.get("form").should("exist");
   });
 
-  it("TODO even more", () => {
-    cy.getCookies().then(cookies => {
-      console.log("more");
-      console.dir(cookies);
-      expect(7).to.eq(8);
-    });
+  it("Should find form element at /add_issuance", () => {
+    cy.visit("/add_issuance");
+    cy.get("form").should("exist");
+  });
+
+  it("Should find view title at /manage_credentials", () => {
+    cy.visit("/manage_credentials")
+    cy.get("h1").should("exist").should("contain", "Manage Credentials");
   });
 });

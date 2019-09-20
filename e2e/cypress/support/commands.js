@@ -1,25 +1,38 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This is will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+const casServerUrl = "https://casserver.herokuapp.com/cas/login";
+
+Cypress.Commands.add("login", () => {
+  const firstRequest = {
+    method: "GET",
+    url: casServerUrl
+  };
+
+  const secondRequest = {
+    method: "POST",
+    url: casServerUrl,
+    qs: {
+      service:
+        "http://admin.127.0.0.1.xip.io/accounts/login?next=%2Fmanage_credentials%2F"
+    },
+    followRedirect: true,
+    form: true,
+    body: {
+      username: "casuser",
+      password: "Mellon",
+      _eventId: "submit"
+    }
+  };
+
+  cy.request(firstRequest)
+    .then(response => {
+      expect(response.status).to.eq(200);
+
+      const parser = new DOMParser();
+      const html = parser.parseFromString(response.body, "text/html");
+      const inputElements = html.querySelectorAll("input[name='execution']");
+
+      if (inputElements && inputElements[0] && inputElements[0]["value"]) {
+        secondRequest.body.execution = inputElements[0]["value"];
+      }
+    })
+    .then(() => cy.request(secondRequest))
+});
