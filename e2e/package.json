@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "devDependencies": {
-    "cypress": "^3.4.1"
+  "devDependencies": {},
+  "dependencies": {
+    "cypress": "^3.4.1",
+    "cypress-file-upload": "^3.3.3"
   }
 }
