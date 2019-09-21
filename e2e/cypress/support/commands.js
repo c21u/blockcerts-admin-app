@@ -1,3 +1,5 @@
+import "cypress-file-upload";
+
 const casServerUrl = Cypress.env("CAS_SERVER_URL");
 
 Cypress.Commands.add("login", () => {
