@@ -3,11 +3,6 @@ describe("Basic UI", () => {
     // log in only once before any of the tests run.
     cy.login();
   });
-  beforeEach(() => {
-    // before each test, we can automatically preserve certain cookies,
-    // so they will not be cleared before the next test starts.
-    Cypress.Cookies.preserveOnce("csrftoken", "messages", "sessionid");
-  });
 
   it("Should find form element at /add_credential", () => {
     cy.visit("/add_credential");
