@@ -30,6 +30,8 @@ class CertMailerConfig(models.Model):
     introduction_email_body = models.TextField()
     cert_email_subject = models.CharField(max_length=100)
     cert_email_body = models.TextField()
+    remind_email_subject = models.CharField(max_length=250)
+    remind_email_body = models.TextField()
 
     def __str__(self):
         return self.name
