@@ -3,26 +3,23 @@ version: '3'
 services:
   db:
     image: postgres
-    volumes:
-    - postgres_data:/var/lib/postgresql/data/
     environment:
         POSTGRES_USER: admin
         POSTGRES_PASSWORD: c21u_admin_cert_access
-        POSTGRES_DB: certs
+        POSTGRES_DB: certs_ci
   web:
     build: ..
-    command: sh /code/run.sh
+    command: sh /code/run-ci.sh
     environment:
       DB_ENGINE: django.db.backends.postgresql
       DB_HOST: db
       DB_USER: admin
-      DB_NAME: certs
+      DB_NAME: certs_ci
       DB_PASSWORD: c21u_admin_cert_access
       DEBUG: "True"
       MANDRILL_API_KEY: $MANDRILL_API_KEY
       SENDGRID_API_KEY: $SENDGRID_API_KEY
       HOSTNAME: web
-      VIRTUAL_HOST: admin.127.0.0.1.xip.io
       CAS_SERVER_URL: https://casserver.herokuapp.com/cas/
     volumes:
       - ..:/code
@@ -30,7 +27,6 @@ services:
       - "8000"
     depends_on:
       - db
-
   e2e:
     container_name: cypress
     build: .
@@ -43,15 +39,3 @@ services:
       - ./cypress:/app/cypress:rw
       - ./cypress.json:/app/cypress.json:ro
       - ./cypress.env.json:/app/cypress.env.json:ro
-    
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - $HOME/certs:/etc/nginx/certs
-
-volumes:
-  postgres_data:
