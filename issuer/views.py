@@ -244,6 +244,12 @@ class CompletedRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/completed.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['completed_personissuances'] = (
+            context['issuance'].personissuances_set.filter(is_approved=True,
+                                                           is_issued=True))
+        return context
 
 class InviteRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance

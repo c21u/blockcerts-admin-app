@@ -15,10 +15,10 @@
         </tr>
     </thead>
     <tbody>
-    {% for person in issuance.people.all %}
+    {% for pi in completed_personissuances %}
         <tr>
-            <th scope="row">{{ person.last_name }}, {{ person.first_name }}</th>
-            <td>{{ person.email }}</td>
+            <th scope="row">{{ pi.person.last_name }}, {{ pi.person.first_name }}</th>
+            <td>{{ pi.person.email }}</td>
             <td>?</td>
             <td></td>
         </tr>
