@@ -2,6 +2,27 @@ import "cypress-file-upload";
 
 const casServerUrl = Cypress.env("CAS_SERVER_URL");
 
+/**
+ * CSV file upload
+ */
+const CSV_UPLOAD = "csvUpload";
+Cypress.Commands.add(CSV_UPLOAD, fixtureName => {
+  Cypress.log({
+    name: CSV_UPLOAD,
+    message: `${fixtureName}`
+  });
+  cy.fixture(`uploads/${fixtureName}`).then(fixtureContent => {
+    cy.get("#csv_file").upload({
+      fileContent: fixtureContent,
+      fileName: "uploaded.csv",
+      mimeType: "text/csv"
+    });
+  });
+});
+
+/**
+ * Login command
+ */
 Cypress.Commands.add("login", () => {
   cy.request(casServerUrl).then(response => {
     expect(response.status).to.eql(200);
