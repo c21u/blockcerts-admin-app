@@ -28,7 +28,13 @@
             <tr>
                 <th scope="row">{{ pi.person.last_name }}, {{ pi.person.first_name }}</th>
                 <td>{{ pi.person.email }}</td>
-                <td>?</td>
+                <td>
+                    {% if pi.is_approved %}
+                        <span class="badge badge-pill badge-success">Approved</span>
+                    {% else %}
+                        <span class="badge badge-pill badge-danger">Not Approved</span>
+                    {% endif %}
+                </td>
                 <td>{{ pi.last_reminded_at }}</td>
                 <td>{{ pi.person.nonce }}</td>
                 <td>
