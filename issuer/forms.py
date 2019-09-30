@@ -18,6 +18,7 @@ class CredentialForm(forms.ModelForm):
 
 class IssuanceForm(forms.Form):
     date_issue = forms.DateField(label='Issue Date', widget=DatePickerInput())
+    name = forms.CharField(label='Name', widget=forms.TextInput(attrs={'id': 'name'}), required=False)
 
     def __init__(self):
         super(IssuanceForm, self).__init__()

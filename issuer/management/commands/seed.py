@@ -66,6 +66,7 @@ def create_issuance(credential):
     issuance = Issuance(
         credential_id=credential.id,
         date_issue=datetime.today(),
+        name='',
         url_id=uuid4().hex[:6].upper()
     )
     issuance.save()

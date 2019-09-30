@@ -188,6 +188,7 @@ class IssuanceView(LoginRequiredMixin, View):
         issuance_post = request.POST
         issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
+        issuance_data['name'] = issuance_post.get('name')
         issuance = self.add_issuance(issuance_data)
         issuance_url = request.scheme + '://' + request.get_host() + '/' + str(issuance.url_id) + '/add_person/'
 
@@ -203,6 +204,7 @@ class IssuanceView(LoginRequiredMixin, View):
         issuance, created = Issuance.objects.get_or_create(
             date_issue=issuance['date_issue'],
             url_id=url_id,
+            name=issuance['name'],
             credential=linked_credential
         )
         return issuance
