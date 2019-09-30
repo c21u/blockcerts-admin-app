@@ -51,6 +51,7 @@ class Credential(models.Model):
 
 
 class Issuance(models.Model):
+    name = models.TextField(default='')
     date_issue = models.DateField()
     url_id = models.TextField(default='')
     credential = models.ForeignKey(Credential, on_delete=models.CASCADE)
@@ -66,7 +67,10 @@ class Issuance(models.Model):
         return self.personissuances_set.filter(is_issued=True).count()
 
     def __str__(self):
-        return f'{self.credential.title}: {self.date_issue}'
+        separator = ''
+        if self.name:
+            separator = ': '
+        return f'{self.name}{separator}{self.date_issue}'
 
 
 class Person(models.Model):
