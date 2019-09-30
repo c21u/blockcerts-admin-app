@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    environment:
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: c21u_admin_cert_access
+        POSTGRES_DB: certs_ci
+  web:
+    build: ..
+    command: sh /code/run-ci.sh
+    environment:
+      DB_ENGINE: django.db.backends.postgresql
+      DB_HOST: db
+      DB_USER: admin
+      DB_NAME: certs_ci
+      DB_PASSWORD: c21u_admin_cert_access
+      DEBUG: "True"
+      MANDRILL_API_KEY: $MANDRILL_API_KEY
+      SENDGRID_API_KEY: $SENDGRID_API_KEY
+      HOSTNAME: web
+      CAS_SERVER_URL: https://casserver.herokuapp.com/cas/
+    volumes:
+      - ..:/code
+    expose:
+      - "8000"
+    depends_on:
+      - db
+  e2e:
+    container_name: cypress
+    build: .
+    depends_on:
+      - web
+    command: npx cypress run
+    environment:
+      CYPRESS_baseUrl: http://web:8000
+    volumes:
+      - ./cypress:/app/cypress:rw
+      - ./cypress.json:/app/cypress.json:ro
+      - ./cypress.env.json:/app/cypress.env.json:ro

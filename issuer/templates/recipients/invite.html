@@ -1,7 +1,7 @@
 {% extends 'header.html' %}
 {% load staticfiles%}
 {% block body_block %}
-    <h1>Manage Recipients - Invite</h1>
+    <h1 data-test-id="app-credential-invite-title">Manage Recipients - Invite</h1>
     <h3>{{ issuance.credential.title }}</h3>
     <h4>{{ issuance.date_issue }}</h4>
 
@@ -30,7 +30,7 @@
         </div>
         <div class="form-group">
             <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
-                <button class="btn btn-primary"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload</button>
+                <button class="btn btn-primary" data-test-id="app-invite-submit-button"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload</button>
             </div>
         </div>
     </form>

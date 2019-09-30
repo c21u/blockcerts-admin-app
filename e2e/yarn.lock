@@ -253,6 +253,11 @@ cross-spawn@^6.0.0:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
+cypress-file-upload@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-3.3.3.tgz#119188fa78e9cfc00904c52d76d4ca56d34950df"
+  integrity sha512-CmXGRMHonoyCa8EcF6jomxqMAe56HvKfnW7S69EmTga8ecYmvQUI6gYttcHO+5UTmFQOFl7xbABV3+AbnI4btA==
+
 cypress@^3.4.1:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-3.4.1.tgz#ca2e4e9864679da686c6a6189603efd409664c30"
