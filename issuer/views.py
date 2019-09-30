@@ -290,7 +290,9 @@ class UploadCsvView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('recipients/invite', args=[issuance.id]))
 
         people_to_invite = []
-        with io.TextIOWrapper(csv_file, encoding='utf-8') as text_file:
+
+        # The utf-8-sig encoding will gracefully handle a BOM if present.
+        with io.TextIOWrapper(csv_file, encoding='utf-8-sig') as text_file:
             reader = csv.DictReader(text_file)
             for row in reader:
                 if not Person.objects.filter(email=row['email']).exists():
