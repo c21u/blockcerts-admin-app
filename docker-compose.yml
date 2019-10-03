@@ -1,4 +1,4 @@
-version: '3'
+version: '2.4'
 
 services:
   db:
@@ -34,8 +34,8 @@ services:
     expose:
       - "8000"
     depends_on:
-      - db:
-          condition: service_healthy
+      db:
+        condition: service_healthy
 
   nginx-proxy:
     image: jwilder/nginx-proxy
