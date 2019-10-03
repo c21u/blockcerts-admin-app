@@ -9,6 +9,11 @@ services:
         POSTGRES_USER: admin
         POSTGRES_PASSWORD: c21u_admin_cert_access
         POSTGRES_DB: certs
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d certs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   web:
     build: .
     command: sh /code/run.sh
@@ -29,7 +34,8 @@ services:
     expose:
       - "8000"
     depends_on:
-      - db
+      - db:
+          condition: service_healthy
 
   nginx-proxy:
     image: jwilder/nginx-proxy
