@@ -1,4 +1,4 @@
-version: '3'
+version: '2.4'
 
 services:
   db:
@@ -7,6 +7,11 @@ services:
         POSTGRES_USER: admin
         POSTGRES_PASSWORD: c21u_admin_cert_access
         POSTGRES_DB: certs_ci
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d certs_ci"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   web:
     build: ..
     command: sh /code/run-ci.sh
@@ -26,7 +31,8 @@ services:
     expose:
       - "8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   e2e:
     container_name: cypress
     build: .
