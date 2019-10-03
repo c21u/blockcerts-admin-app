@@ -162,6 +162,7 @@ class CredentialView(LoginRequiredMixin, View):
             description=credential['description'],
             narrative=credential['narrative'],
             issuing_department=credential['issuing_department'],
+            cert_tools_config=credential['cert_tools_config'],
             cert_mailer_config=credential['cert_mailer_config']
         )
 
