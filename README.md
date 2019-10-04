@@ -1,0 +1,4 @@
+# blockcerts-admin-app
+A web interface for creating and issuing blockcerts
+
+![Build status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiVHI0MHR1UWR5MktsZ2pMcUJqemU1L0FFM0U2ZjlXcXQwSUJvcFUvRkh5S1JnRGVlSnJWbllEckx3NmdrNnoxUHNHZldFV2ordStEOWRmQzYxNE5tN3pZPSIsIml2UGFyYW1ldGVyU3BlYyI6IkJqSzRlbDlXcmZvOWhOZmwiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
