@@ -187,7 +187,7 @@ class IssuanceView(LoginRequiredMixin, View):
     def post(self, request):
         issuance_data = {}
         issuance_post = request.POST
-        issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
+        issuance_data['credential_id'] = int(issuance_post.get('credential'))
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
         issuance_data['name'] = issuance_post.get('name')
         issuance = self.add_issuance(issuance_data)
