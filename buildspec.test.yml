@@ -1,0 +1,10 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  build:
+    commands:
+      # docker-compose to run e2e tests
+      - docker-compose --no-ansi -f ./e2e/docker-compose.test.yml up --exit-code-from e2e
