@@ -46,5 +46,50 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - $HOME/certs:/etc/nginx/certs
 
+  bitcoind:
+    image: seegno/bitcoind:0.13-alpine
+    environment:
+      PRIVKEY: cUiqhQJ4SKmwsCGVA6sJqGiFYifyhXbk3nu7Wv8eQxfVR1kZ3u8D
+      ISSUER: myTiVfMp9ygfQSmpKf9WUrTAewz8ebqMsr
+      BTC_CLI: bitcoin-cli -regtest -rpcpassword=makeitrain
+    command: |
+      /bin/ash -c "until $$BTC_CLI importprivkey $$PRIVKEY 2>/dev/null && if [ \"$$($$BTC_CLI getblockcount)\" -lt 100 ]; then $$BTC_CLI generate 101 && $$BTC_CLI sendtoaddress $$ISSUER 49; fi
+        do
+          sleep 2
+        done &
+        bitcoind -printtoconsole -regtest=1 -rpcpassword=makeitrain -rpcallowip=172.22.0.0/16"
+    networks:
+      - bc
+
+  cert-issuer:
+    image: stuartfreeman/blockcerts-issuer
+    environment:
+      WORKERS_PER_CORE: 1
+      WEB_CONCURRENCY: 1
+      VIRTUAL_HOST: cert-issuer.127.0.0.1.xip.io
+      PRIVKEY: cUiqhQJ4SKmwsCGVA6sJqGiFYifyhXbk3nu7Wv8eQxfVR1kZ3u8D
+      ISSUING_ADDRESS: myTiVfMp9ygfQSmpKf9WUrTAewz8ebqMsr
+      USB_NAME: /etc/cert-issuer/
+      KEY_FILE: pk_issuer.txt
+      NO_SAFE_MODE: "True"
+      CHAIN: bitcoin_regtest
+      BITCOIND: "True"
+    command: /bin/bash -c "mkdir -p ~/.bitcoin; echo $$PRIVKEY > $$USB_NAME/$$KEY_FILE && echo -e rpcpassword=makeitrain\\\\nrpcconnect=blockcerts-admin-app_bitcoind_1\\\\nrpcport=18332 > ~/.bitcoin/bitcoin.conf && /start.sh"
+    expose:
+      - 80
+    networks:
+      - default
+      - bc
+    depends_on:
+      - bitcoind
+
 volumes:
   postgres_data:
+
+networks:
+  bc:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
