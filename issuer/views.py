@@ -83,7 +83,7 @@ def send_invite(person, credential, is_reminder=False):
 
 def send_invites(people, credential, is_reminder=False):
     if len(people) > 0:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             executor.map(send_invite, people, repeat(credential), repeat(is_reminder))
 
 
