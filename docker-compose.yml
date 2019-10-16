@@ -82,6 +82,7 @@ services:
       - bc
     depends_on:
       - bitcoind
+      - nginx-proxy
 
 volumes:
   postgres_data:
