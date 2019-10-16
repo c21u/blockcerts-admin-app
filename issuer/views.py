@@ -170,6 +170,7 @@ class CredentialView(LoginRequiredMixin, View):
             description=credential['description'],
             narrative=credential['narrative'],
             issuing_department=credential['issuing_department'],
+            cert_tools_config=credential['cert_tools_config'],
             cert_mailer_config=credential['cert_mailer_config']
         )
 
@@ -194,7 +195,7 @@ class IssuanceView(LoginRequiredMixin, View):
     def post(self, request):
         issuance_data = {}
         issuance_post = request.POST
-        issuance_data['credential_id'] = int(issuance_post.get('credential')[0])
+        issuance_data['credential_id'] = int(issuance_post.get('credential'))
         issuance_data['date_issue'] = datetime.strptime(issuance_post.get('date_issue'), '%m/%d/%Y')
         issuance_data['name'] = issuance_post.get('name')
         issuance = self.add_issuance(issuance_data)
@@ -287,6 +288,7 @@ class CompletedRecipientsView(LoginRequiredMixin, generic.DetailView):
                                                            is_issued=True))
         return context
 
+
 class InviteRecipientsView(LoginRequiredMixin, generic.DetailView):
     model = Issuance
     template_name = "recipients/invite.html"
@@ -299,8 +301,8 @@ class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['institution_name'] = settings.INSTITUTION_NAME
-        context['approved_count'] = context['issuance'].personissuances_set.filter(is_approved=True).count()
-        context['unapproved_count'] = context['issuance'].personissuances_set.filter(is_approved=False).count()
+        context['approved_count'] = context['issuance'].personissuances_set.filter(is_approved=True, is_issued=False).count()
+        context['unapproved_count'] = context['issuance'].personissuances_set.filter(is_approved=False, is_issued=False).count()
         return context
 
     def post(self, request, *args, **kwargs):
