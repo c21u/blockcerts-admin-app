@@ -231,7 +231,7 @@ class IssueCertificatesView(View):
     def post(self, request):
         unsigned_certs_batch = []
         for person_issuance in PersonIssuances.objects.filter(is_issued=False, is_approved=True).exclude(person__public_address=''):
-            issuance = Issuance.objects.get(id=person_issuance.issuance.id)
+            issuance = person_issuance.issuance
             person = {
                       'name': f'{person_issuance.person.first_name} {person_issuance.person.last_name}',
                       'pubkey': f'ecdsa-koblitz-pubkey: {person_issuance.person.public_address}',
