@@ -65,8 +65,6 @@ services:
   cert-issuer:
     image: stuartfreeman/blockcerts-issuer
     environment:
-      WORKERS_PER_CORE: 1
-      WEB_CONCURRENCY: 1
       VIRTUAL_HOST: cert-issuer.127.0.0.1.xip.io
       PRIVKEY: cUiqhQJ4SKmwsCGVA6sJqGiFYifyhXbk3nu7Wv8eQxfVR1kZ3u8D
       ISSUING_ADDRESS: myTiVfMp9ygfQSmpKf9WUrTAewz8ebqMsr

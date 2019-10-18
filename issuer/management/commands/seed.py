@@ -38,7 +38,7 @@ def create_cert_tools_config():
         issuer_name='Example University',
         issuer_id='https://issuer.example.com',
         revocation_list='https://issuer.example.com/revocations.json',
-        issuer_public_key='ecdsa-koblitz-pubkey:mtYhLaFbZbio7m4whmKX8jbV91J3ABnjVo',
+        issuer_public_key='ecdsa-koblitz-pubkey:myTiVfMp9ygfQSmpKf9WUrTAewz8ebqMsr',
         display_html_template=("<div style='font-family:Helvetica, sans-serif;'><h1>$title</h1><h2>ISSUED TO $name</h2>"
                                "<h2>ISSUED ON $date_issue</h2><h3>DESCRIPTION</h3><p>$description</p><h3>ISSUER</h3><p>$issuing_department</p></div>")
     )
