@@ -94,8 +94,8 @@ class PersonIssuances(models.Model):
     issuance = models.ForeignKey(Issuance, on_delete=models.CASCADE)
     is_issued = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
-    unsigned_certificate = models.TextField(default='')
     last_reminded_at = models.DateTimeField(default=timezone.now)
+    cert_uid = models.TextField(default='')
 
     def __str__(self):
         return f'{self.person}: {self.issuance}'

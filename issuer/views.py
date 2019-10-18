@@ -6,6 +6,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic, View
 from django.utils.html import strip_tags
+from django.core.files.storage import DefaultStorage
+from django.core.files.base import ContentFile
 
 from .models import Person, Credential, Issuance, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
@@ -17,12 +19,13 @@ import os
 import uuid
 import concurrent.futures
 from types import SimpleNamespace as Namespace
-from cert_mailer import introduce
+from cert_mailer import introduce, sendcert
 from string import Template
 from cert_tools.create_v2_certificate_template import create_certificate_template
 from cert_tools.instantiate_v2_certificate_batch import Recipient, create_unsigned_certificates_from_roster
 from datetime import datetime
 from itertools import repeat
+import requests
 
 
 def get_unsigned_credential(credential, person):
@@ -85,6 +88,13 @@ def send_invites(people, credential, is_reminder=False):
     if len(people) > 0:
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             executor.map(send_invite, people, repeat(credential), repeat(is_reminder))
+
+
+def send_issued_cert(person, credential, cert_filename):
+    mailer_config = credential.cert_mailer_config
+    mailer_config.cert_url = settings.CERT_URL
+    person_email = {'first_name': person.first_name, 'email': person.email, 'filename': cert_filename}
+    sendcert.send_email(mailer_config, person_email)
 
 
 def add_new_person(person):
@@ -211,10 +221,21 @@ class IssuanceView(LoginRequiredMixin, View):
         return issuance
 
 
-class UnsignedCertificatesView(View):
+class IssueResponse(HttpResponse):
+    def __init__(self, data, callback, **kwargs):
+        super().__init__(data, **kwargs)
+        self.callback = callback
+
+    def close(self):
+        super().close()
+        self.callback()
+
+
+class IssueCertificatesView(View):
     def post(self, request):
+        unsigned_certs_batch = []
         for person_issuance in PersonIssuances.objects.filter(is_issued=False, is_approved=True).exclude(person__public_address=''):
-            issuance = Issuance.objects.get(id=person_issuance.issuance.id)
+            issuance = person_issuance.issuance
             person = {
                       'name': f'{person_issuance.person.first_name} {person_issuance.person.last_name}',
                       'pubkey': f'ecdsa-koblitz-pubkey: {person_issuance.person.public_address}',
@@ -222,9 +243,28 @@ class UnsignedCertificatesView(View):
 
             person = Recipient(person)
             usc = get_unsigned_credential(issuance.credential, person)
-            person_issuance.unsigned_certificate = json.dumps(usc)
+            for uid in usc.keys():
+                person_issuance.cert_uid = uid
+            unsigned_certs_batch.append(usc)
             person_issuance.save()
-        return HttpResponse("DONE")
+
+        if len(unsigned_certs_batch) > 0:
+            signed_certs_batch = requests.post(settings.CERT_ISSUER_URL, json=unsigned_certs_batch).json()
+
+            def process_signed_certs():
+                default_storage = DefaultStorage()
+                for signed_cert in signed_certs_batch:
+                    for uid in signed_cert.keys():
+                        if uid != 'signature':
+                            person_issuance = PersonIssuances.objects.get(cert_uid=uid)
+                            default_storage.save(uid + '.json', ContentFile(json.dumps(signed_cert)))
+                            send_issued_cert(person_issuance.person, person_issuance.issuance.credential, uid + '.json')
+                            person_issuance.is_issued = True
+                            person_issuance.save()
+
+            return IssueResponse(f'{len(unsigned_certs_batch)} Certs Issued', process_signed_certs, status=200)
+        else:
+            return HttpResponse('0 Certs Issued')
 
 
 class ThankYouView(View):
