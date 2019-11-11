@@ -11,16 +11,26 @@
             <th scope="col">Name</th>
             <th scope="col">Email</th>
             <th scope="col">Status</th>
-            <th scope="col">Last notified</th>
+            <th scope="col">Approval Date</th>
+            <th scope="col">Issue Date</th>
         </tr>
     </thead>
     <tbody>
-    {% for pi in completed_personissuances %}
+    {% for pi in approved_personissuances %}
         <tr>
             <th scope="row">{{ pi.person.last_name }}, {{ pi.person.first_name }}</th>
             <td>{{ pi.person.email }}</td>
-            <td>?</td>
-            <td></td>
+            {% if pi.is_issued %}
+                <td>Complete</td>
+            {% else %}
+                <td>Pending</td>
+            {% endif %}
+            <td>{{ pi.approved_at }}</td>
+            {% if pi.is_issued %}
+                <td>{{ pi.issued_at }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
         </tr>
     {% endfor %}
     </tbody>
