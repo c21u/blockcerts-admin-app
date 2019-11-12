@@ -260,6 +260,7 @@ class IssueCertificatesView(View):
                             default_storage.save(uid + '.json', ContentFile(json.dumps(signed_cert)))
                             send_issued_cert(person_issuance.person, person_issuance.issuance.credential, uid + '.json')
                             person_issuance.is_issued = True
+                            person_issuance.issued_at = datetime.now().strftime('%Y-%m-%d')
                             person_issuance.save()
 
             return IssueResponse(f'{len(unsigned_certs_batch)} Certs Issued', process_signed_certs, status=200)
@@ -279,7 +280,8 @@ class ApproveRecipientsView(LoginRequiredMixin, generic.DetailView):
     def post(self, request, *args, **kwargs):
         data = request.POST.copy()
         people_to_approve = data.getlist('people_to_approve')
-        PersonIssuances.objects.filter(id__in=people_to_approve).update(is_approved=True)
+        PersonIssuances.objects.filter(id__in=people_to_approve).update(is_approved=True,
+                                                                        approved_at=datetime.now().strftime('%Y-%m-%d'))
         return render(request, 'recipients/approve_success.html', {'approved_count': len(people_to_approve)})
 
 
@@ -289,9 +291,8 @@ class CompletedRecipientsView(LoginRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['completed_personissuances'] = (
-            context['issuance'].personissuances_set.filter(is_approved=True,
-                                                           is_issued=True))
+        context['approved_personissuances'] = (
+            context['issuance'].personissuances_set.filter(is_approved=True))
         return context
 
 
