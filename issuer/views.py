@@ -257,7 +257,9 @@ class IssueCertificatesView(View):
                     for uid in signed_cert.keys():
                         if uid != 'signature':
                             person_issuance = PersonIssuances.objects.get(cert_uid=uid)
-                            default_storage.save(uid + '.json', ContentFile(json.dumps(signed_cert[uid])))
+                            full_cert = signed_cert[uid]
+                            full_cert['signature'] = signed_cert['signature']
+                            default_storage.save(uid + '.json', ContentFile(json.dumps(full_cert)))
                             send_issued_cert(person_issuance.person, person_issuance.issuance.credential, uid + '.json')
                             person_issuance.is_issued = True
                             person_issuance.issued_at = datetime.now().strftime('%Y-%m-%d')
