@@ -66,6 +66,9 @@ class Issuance(models.Model):
     def issued_count(self):
         return self.personissuances_set.filter(is_issued=True).count()
 
+    def approved_count(self):
+        return self.personissuances_set.filter(is_approved=True).count()
+
     def __str__(self):
         separator = ''
         if self.name:
@@ -93,7 +96,9 @@ class PersonIssuances(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     issuance = models.ForeignKey(Issuance, on_delete=models.CASCADE)
     is_issued = models.BooleanField(default=False)
+    issued_at = models.DateField(default=timezone.now)
     is_approved = models.BooleanField(default=False)
+    approved_at = models.DateField(default=timezone.now)
     last_reminded_at = models.DateTimeField(default=timezone.now)
     cert_uid = models.TextField(default='')
 
