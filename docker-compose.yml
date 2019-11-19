@@ -29,7 +29,6 @@ services:
       HOSTNAME: admin.127.0.0.1.xip.io
       VIRTUAL_HOST: admin.127.0.0.1.xip.io
       CAS_SERVER_URL: https://casserver.herokuapp.com/cas/
-      CERT_ISSUER_URL: http://cert-issuer/cert_issuer/api/v1.0/issue
     volumes:
       - .:/code
     expose:

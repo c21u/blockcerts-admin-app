@@ -233,7 +233,7 @@ class IssueResponse(HttpResponse):
 
 class IssueCertificatesView(View):
     def post(self, request):
-        unsigned_certs_batch = []
+        unsigned_certs_batch = {}
         for person_issuance in PersonIssuances.objects.filter(is_issued=False, is_approved=True).exclude(person__public_address=''):
             issuance = person_issuance.issuance
             person = {
@@ -245,11 +245,17 @@ class IssueCertificatesView(View):
             usc = get_unsigned_credential(issuance.credential, person)
             for uid in usc.keys():
                 person_issuance.cert_uid = uid
-            unsigned_certs_batch.append(usc)
+            issuer_api_url = issuance.credential.cert_tools_config.issuer_api_url
+            if issuer_api_url not in unsigned_certs_batch:
+                unsigned_certs_batch[issuer_api_url] = [usc]
+            else:
+                unsigned_certs_batch[issuer_api_url].append(usc)
             person_issuance.save()
 
-        if len(unsigned_certs_batch) > 0:
-            signed_certs_batch = requests.post(settings.CERT_ISSUER_URL, json=unsigned_certs_batch).json()
+        if len(unsigned_certs_batch.keys()) > 0:
+            signed_certs_batch = []
+            for issuer_api_url in unsigned_certs_batch:
+                signed_certs_batch += requests.post(issuer_api_url, json=unsigned_certs_batch[issuer_api_url]).json()
 
             def process_signed_certs():
                 default_storage = DefaultStorage()
@@ -265,7 +271,7 @@ class IssueCertificatesView(View):
                             person_issuance.issued_at = datetime.now().strftime('%Y-%m-%d')
                             person_issuance.save()
 
-            return IssueResponse(f'{len(unsigned_certs_batch)} Certs Issued', process_signed_certs, status=200)
+            return IssueResponse(f'{len(signed_certs_batch)} Certs Issued', process_signed_certs, status=200)
         else:
             return HttpResponse('0 Certs Issued')
 

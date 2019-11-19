@@ -17,6 +17,7 @@ class CertToolsConfig(models.Model):
     revocation_list = models.URLField()
     issuer_public_key = models.CharField(max_length=60)
     display_html_template = models.TextField()
+    issuer_api_url = models.URLField()
 
     def __str__(self):
         return self.name
