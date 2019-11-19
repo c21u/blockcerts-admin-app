@@ -32,7 +32,8 @@ from issuer.views import (HomePageView,
                           InviteRecipientsView,
                           RemindRecipientsView,
                           ManageCredentialsView,
-                          UploadCsvView)
+                          UploadCsvView,
+                          ViewApprovedView)
 
 urlpatterns = [
     path('accounts/login', django_cas_ng.views.LoginView.as_view(), name='cas_ng_login'),
@@ -52,5 +53,6 @@ urlpatterns = [
     url(r'^manage_recipients/(?P<pk>\w+)/invite', InviteRecipientsView.as_view(), name='recipients/invite'),
     url(r'^manage_recipients/(?P<pk>\w+)/remind', RemindRecipientsView.as_view(), name='recipients/remind'),
     url(r'^manage_credentials/', ManageCredentialsView.as_view(), name='credentials/manage'),
-    url(r'^upload/csv/$', UploadCsvView.as_view(), name='upload_csv')
+    url(r'^upload/csv/$', UploadCsvView.as_view(), name='upload_csv'),
+    url(r'^view_approved/', ViewApprovedView.as_view(), name='view_approved')
 ]

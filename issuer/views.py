@@ -361,3 +361,10 @@ class UploadCsvView(LoginRequiredMixin, View):
                 )
         send_invites(people_to_invite, issuance.credential)
         return HttpResponseRedirect(reverse('recipients/approve', args=[issuance.id]))
+
+
+class ViewApprovedView(LoginRequiredMixin, View):
+    def get(self, request):
+        approved_personissuances = PersonIssuances.objects.filter(is_approved=True, is_issued=False)
+        print(approved_personissuances)
+        return render(request, 'view_approved.html', {'approved_personissuances': approved_personissuances})
