@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -8,6 +8,7 @@ from django.views import generic, View
 from django.utils.html import strip_tags
 from django.core.files.storage import DefaultStorage
 from django.core.files.base import ContentFile
+from django.contrib.auth.decorators import user_passes_test
 
 from .models import Person, Credential, Issuance, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
@@ -361,3 +362,20 @@ class UploadCsvView(LoginRequiredMixin, View):
                 )
         send_invites(people_to_invite, issuance.credential)
         return HttpResponseRedirect(reverse('recipients/approve', args=[issuance.id]))
+
+
+def superuser_required():
+    def wrapper(wrapped):
+        class WrappedClass(UserPassesTestMixin, wrapped):
+            def test_func(self):
+                return self.request.user.is_superuser and self.request.user.is_active
+
+        return WrappedClass
+    return wrapper
+
+@superuser_required()
+class ViewApprovedView(LoginRequiredMixin, View):
+    def get(self, request):
+        approved_personissuances = PersonIssuances.objects.filter(is_approved=True, is_issued=False)
+        print(approved_personissuances)
+        return render(request, 'view_approved.html', {'approved_personissuances': approved_personissuances})

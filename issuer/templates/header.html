@@ -24,6 +24,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/manage_credentials">Manage Credentials</a>
                 </li>
+                {% if user.is_superuser and user.is_active %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/view_approved">View Approved</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
