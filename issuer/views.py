@@ -8,7 +8,6 @@ from django.views import generic, View
 from django.utils.html import strip_tags
 from django.core.files.storage import DefaultStorage
 from django.core.files.base import ContentFile
-from django.contrib.auth.decorators import user_passes_test
 
 from .models import Person, Credential, Issuance, PersonIssuances
 from .forms import PersonForm, CredentialForm, IssuanceForm
@@ -46,6 +45,7 @@ def get_unsigned_credential(credential, person):
     template.hash_emails = False
     template.additional_per_recipient_fields = None
     template.display_html = Template(cert_tools_config.display_html_template).safe_substitute(name=person.name,
+                                                                                              title=credential.title,
                                                                                               date_issue=datetime.now().strftime("%B %d, %Y"),
                                                                                               description=credential.description,
                                                                                               issuing_department=credential.issuing_department,
