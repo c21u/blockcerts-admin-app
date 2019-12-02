@@ -69,8 +69,9 @@ def get_unsigned_credential(credential, person):
     template.abs_data_dir = os.path.abspath(os.path.join(os.getcwd(), 'data'))
     template = create_certificate_template(template)
     usc = create_unsigned_certificates_from_roster(template, [person], False, None, False)
-    for uid in usc.keys():
-        usc[uid]['id'] = settings.VIEW_URL.format(uid)
+    # We only ever ask for one cert here so it's always the first one
+    uid = next(iter(usc))
+    usc[uid]['id'] = settings.VIEW_URL.format(uid)
 
     return usc
 
@@ -235,6 +236,7 @@ class IssueResponse(HttpResponse):
 class IssueCertificatesView(View):
     def post(self, request):
         unsigned_certs_batch = {}
+        id_map = {}
         for person_issuance in PersonIssuances.objects.filter(is_issued=False, is_approved=True).exclude(person__public_address=''):
             issuance = person_issuance.issuance
             person = {
@@ -244,13 +246,14 @@ class IssueCertificatesView(View):
 
             person = Recipient(person)
             usc = get_unsigned_credential(issuance.credential, person)
-            for uid in usc.keys():
-                person_issuance.cert_uid = uid
+            uid = next(iter(usc))
+            id_map[usc[uid]['id']] = uid
+            person_issuance.cert_uid = uid
             issuer_api_url = issuance.credential.cert_tools_config.issuer_api_url
             if issuer_api_url not in unsigned_certs_batch:
-                unsigned_certs_batch[issuer_api_url] = [usc]
+                unsigned_certs_batch[issuer_api_url] = [usc[uid]]
             else:
-                unsigned_certs_batch[issuer_api_url].append(usc)
+                unsigned_certs_batch[issuer_api_url].append(usc[uid])
             person_issuance.save()
 
         if len(unsigned_certs_batch.keys()) > 0:
@@ -261,16 +264,14 @@ class IssueCertificatesView(View):
             def process_signed_certs():
                 default_storage = DefaultStorage()
                 for signed_cert in signed_certs_batch:
-                    for uid in signed_cert.keys():
-                        if uid != 'signature':
-                            person_issuance = PersonIssuances.objects.get(cert_uid=uid)
-                            full_cert = signed_cert[uid]
-                            full_cert['signature'] = signed_cert['signature']
-                            default_storage.save(uid + '.json', ContentFile(json.dumps(full_cert)))
-                            send_issued_cert(person_issuance.person, person_issuance.issuance.credential, uid + '.json')
-                            person_issuance.is_issued = True
-                            person_issuance.issued_at = datetime.now().strftime('%Y-%m-%d')
-                            person_issuance.save()
+                    uid = id_map[signed_cert['id']]
+                    filename = f'{uid}.json'
+                    person_issuance = PersonIssuances.objects.get(cert_uid=uid)
+                    default_storage.save(filename, ContentFile(json.dumps(signed_cert)))
+                    send_issued_cert(person_issuance.person, person_issuance.issuance.credential, filename)
+                    person_issuance.is_issued = True
+                    person_issuance.issued_at = datetime.now().strftime('%Y-%m-%d')
+                    person_issuance.save()
 
             return IssueResponse(f'{len(signed_certs_batch)} Certs Issued', process_signed_certs, status=200)
         else:
