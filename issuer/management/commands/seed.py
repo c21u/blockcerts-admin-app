@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 from uuid import uuid4
 
+from django.contrib.auth.models import Group
 from issuer.models import Credential, Issuance, Person, CertMailerConfig, PersonIssuances, CertToolsConfig
 
 
@@ -12,7 +13,8 @@ class Command(BaseCommand):
         self.stdout.write('Seeding the database...')
         cert_mailer_config = create_cert_mailer_config()
         cert_tools_config = create_cert_tools_config()
-        credential = create_credential(cert_tools_config, cert_mailer_config)
+        issuing_department, created = Group.objects.get_or_create(name='C21U')
+        credential = create_credential(issuing_department, cert_tools_config, cert_mailer_config)
         issuance = create_issuance(credential)
         create_person_issuance(create_person(), issuance)
         create_person_issuance(create_person(), issuance)
@@ -47,10 +49,10 @@ def create_cert_tools_config():
     return cert_tools_config
 
 
-def create_credential(cert_tools_config, cert_mailer_config):
+def create_credential(issuing_department, cert_tools_config, cert_mailer_config):
     topics = ['AI', 'Basketweaving']
     events = ['Seminar', 'Workshop']
-    issuing_department = 'C21U'
+    issuing_department = issuing_department
 
     credential = Credential(
         cert_tools_config=cert_tools_config,
