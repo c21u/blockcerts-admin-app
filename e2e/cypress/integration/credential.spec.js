@@ -6,9 +6,9 @@ describe("Credential", () => {
       cy.get("#id_title").type("Underwater Basketweaving 101");
       cy.get("#id_description").type("Intro to Underwater Basketweaving");
       cy.get("#id_narrative").type("Demonstrated ability to weave a basket underwater.");
-      cy.get("#id_issuing_department").select("1");
-      cy.get("#id_cert_mailer_config").select("1");
-      cy.get("#id_cert_tools_config").select("1");
+      cy.get("#id_issuing_department").select("C21U");
+      cy.get("#id_cert_mailer_config").select("default");
+      cy.get("#id_cert_tools_config").select("default");
 
       cy.get(".btn-primary").click();
 
@@ -17,8 +17,6 @@ describe("Credential", () => {
       cy.get("#id_title").invoke('val').should('eq', '');
       cy.get("#id_description").invoke('val').should('eq', '');
       cy.get("#id_narrative").invoke('val').should('eq', '');
-      cy.get("#id_issuing_department").invoke('val').should('eq', 'C21U');
-
     });
   });
 
@@ -27,7 +25,6 @@ describe("Credential", () => {
     cy.login();
   });
 
-  // NB: this test is gonna be flaky since it relies on a seeded fixture with ID=1
   it("Should create a credential", () => {
     cy.createCredential();
   });
