@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from django.db import models
 from django.utils import timezone
 from uuid import uuid4
@@ -42,7 +43,7 @@ class Credential(models.Model):
     title = models.TextField()
     description = models.TextField()
     narrative = models.TextField()
-    issuing_department = models.CharField(max_length=50)
+    issuing_department = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     cert_mailer_config = models.ForeignKey(CertMailerConfig, on_delete=models.CASCADE)
     cert_tools_config = models.ForeignKey(CertToolsConfig, on_delete=models.CASCADE)
     badge_id = models.TextField(default=get_uuid)
