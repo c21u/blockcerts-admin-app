@@ -374,6 +374,7 @@ def superuser_required():
         return WrappedClass
     return wrapper
 
+
 @superuser_required()
 class ViewApprovedView(LoginRequiredMixin, View):
     def get(self, request):
