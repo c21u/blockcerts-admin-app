@@ -335,6 +335,11 @@ class ManageCredentialsView(LoginRequiredMixin, generic.ListView):
     model = Credential
     template_name = "manageCredentials.html"
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Credential.objects.all()
+        return Credential.objects.filter(issuing_department__in=self.request.user.groups.all())
+
 
 class UploadCsvView(LoginRequiredMixin, View):
     def post(self, request):
