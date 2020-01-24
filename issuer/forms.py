@@ -19,7 +19,7 @@ class CredentialForm(forms.ModelForm):
 
     def clean_issuing_department(self):
         issuing_department = self.cleaned_data.get("issuing_department")
-        if self.user and (self.user.is_superuser or self.user.groups.filter(pk=issuing_department).exists()):
+        if self.user and (self.user.is_superuser or self.user.groups.filter(name=issuing_department).exists()):
             return issuing_department
         raise forms.ValidationError("User is not a member of the issuing_department")
 
