@@ -162,7 +162,7 @@ class CredentialView(LoginRequiredMixin, View):
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request):
-        credential_form = CredentialForm(request.POST)
+        credential_form = CredentialForm(request.POST, user=request.user)
         if credential_form.is_valid():
             self.add_credential(credential_form.cleaned_data)
         credential_form = CredentialForm()
@@ -186,7 +186,7 @@ class UpdateCredentialView(LoginRequiredMixin, View):
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request, id=None):
-        credential_form = CredentialForm(request.POST, instance=Credential.objects.get(id=id))
+        credential_form = CredentialForm(request.POST, instance=Credential.objects.get(id=id), user=request.user)
         credential_form.save()
         return render(request, 'add_credential.html', {'form': credential_form})
 

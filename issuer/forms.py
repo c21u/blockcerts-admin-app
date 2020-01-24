@@ -11,6 +11,16 @@ class PersonForm(forms.Form):
 
 
 class CredentialForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super(CredentialForm, self).__init__(*args, **kwargs)
+
+    def clean_issuing_department(self):
+        issuing_department = self.cleaned_data.get("issuing_department")
+        if self.user and (self.user.is_superuser or self.user.groups.filter(pk=issuing_department).exists()):
+            return issuing_department
+        raise forms.ValidationError("User is not a member of the issuing_department")
+
     class Meta:
         model = Credential
         fields = ["title", "description", "narrative", "issuing_department", "cert_mailer_config", "cert_tools_config"]
