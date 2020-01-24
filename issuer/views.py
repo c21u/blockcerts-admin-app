@@ -158,14 +158,14 @@ class UpdatePersonView(View):
 
 class CredentialView(LoginRequiredMixin, View):
     def get(self, request):
-        credential_form = CredentialForm()
+        credential_form = CredentialForm(user=request.user)
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request):
         credential_form = CredentialForm(request.POST, user=request.user)
         if credential_form.is_valid():
             self.add_credential(credential_form.cleaned_data)
-        credential_form = CredentialForm()
+        credential_form = CredentialForm(user=request.user)
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def add_credential(self, credential):
@@ -182,7 +182,7 @@ class CredentialView(LoginRequiredMixin, View):
 class UpdateCredentialView(LoginRequiredMixin, View):
     def get(self, request, id=None):
         credential = Credential.objects.get(id=id)
-        credential_form = CredentialForm(instance=credential)
+        credential_form = CredentialForm(instance=credential, user=request.user)
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request, id=None):

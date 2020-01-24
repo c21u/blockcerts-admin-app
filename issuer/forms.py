@@ -14,6 +14,8 @@ class CredentialForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
         super(CredentialForm, self).__init__(*args, **kwargs)
+        if not self.user.is_superuser:
+            self.fields["issuing_department"].queryset = self.user.groups
 
     def clean_issuing_department(self):
         issuing_department = self.cleaned_data.get("issuing_department")
