@@ -158,14 +158,14 @@ class UpdatePersonView(View):
 
 class CredentialView(LoginRequiredMixin, View):
     def get(self, request):
-        credential_form = CredentialForm()
+        credential_form = CredentialForm(user=request.user)
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request):
-        credential_form = CredentialForm(request.POST)
+        credential_form = CredentialForm(request.POST, user=request.user)
         if credential_form.is_valid():
             self.add_credential(credential_form.cleaned_data)
-        credential_form = CredentialForm()
+        credential_form = CredentialForm(user=request.user)
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def add_credential(self, credential):
@@ -182,11 +182,11 @@ class CredentialView(LoginRequiredMixin, View):
 class UpdateCredentialView(LoginRequiredMixin, View):
     def get(self, request, id=None):
         credential = Credential.objects.get(id=id)
-        credential_form = CredentialForm(instance=credential)
+        credential_form = CredentialForm(instance=credential, user=request.user)
         return render(request, 'add_credential.html', {'form': credential_form})
 
     def post(self, request, id=None):
-        credential_form = CredentialForm(request.POST, instance=Credential.objects.get(id=id))
+        credential_form = CredentialForm(request.POST, instance=Credential.objects.get(id=id), user=request.user)
         credential_form.save()
         return render(request, 'add_credential.html', {'form': credential_form})
 
@@ -334,6 +334,11 @@ class RemindRecipientsView(LoginRequiredMixin, generic.DetailView):
 class ManageCredentialsView(LoginRequiredMixin, generic.ListView):
     model = Credential
     template_name = "manageCredentials.html"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Credential.objects.all()
+        return Credential.objects.filter(issuing_department__in=self.request.user.groups.all())
 
 
 class UploadCsvView(LoginRequiredMixin, View):
