@@ -241,7 +241,7 @@ class IssueCertificatesView(View):
             issuance = person_issuance.issuance
             person = {
                       'name': f'{person_issuance.person.first_name} {person_issuance.person.last_name}',
-                      'pubkey': f'ecdsa-koblitz-pubkey: {person_issuance.person.public_address}',
+                      'pubkey': f'ecdsa-koblitz-pubkey:{person_issuance.person.public_address}',
                       'identity': person_issuance.person.email}
 
             person = Recipient(person)
