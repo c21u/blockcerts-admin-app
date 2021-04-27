@@ -34,7 +34,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'qrp(xkfh24l&*gjjqn4x)cm0pol)u^q=+a+&#m29u@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
 
-ALLOWED_HOSTS = [os.getenv('HOSTNAME', '0.0.0.0')]
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTNAME', '0.0.0.0')]
 
 USE_X_FORWARDED_HOST = os.getenv('USE_X_FORWARDED_HOST', False)
 

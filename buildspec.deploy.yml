@@ -27,6 +27,9 @@ phases:
       # Log in to ECR
       - $(aws ecr get-login --no-include-email --region $AWS_REGION)
 
+      # Log into docker hub
+      - docker login -u $DHUSER -p $DHPASSWD
+
       # Pull this image for the build to cache from.
       - docker pull $REPO_URL:$TAG || true
   build:
