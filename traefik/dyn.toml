@@ -1,0 +1,9 @@
+[tls.options]
+
+  [tls.options.default]
+    minVersion = "VersionTLS12"
+    sniStrict = true
+
+[[tls.certificates]]
+  certFile = "/data/traefik/127.0.0.1.xip.io.crt"
+  keyFile = "/data/traefik/127.0.0.1.xip.io.key"

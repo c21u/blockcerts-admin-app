@@ -1,0 +1,24 @@
+defaultEntryPoints = ["http", "https"]
+
+[entrypoints]
+  [entrypoints.http]
+    address = ":80"
+    [entryPoints.http.forwardedHeaders]
+      insecure = true
+
+  [entrypoints.https]
+    address = ":443"
+    [entryPoints.https.forwardedHeaders]
+      insecure = true
+
+  [entrypoints.postgres]
+    address = ":5432"
+
+[providers]
+  [providers.docker]
+
+  [providers.file]
+    filename = "/etc/traefik/dyn.toml"
+
+[api]
+  insecure = true

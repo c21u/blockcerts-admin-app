@@ -9,6 +9,11 @@ services:
         POSTGRES_USER: admin
         POSTGRES_PASSWORD: c21u_admin_cert_access
         POSTGRES_DB: certs
+    labels:
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres.entrypoints=postgres"
+      - "traefik.tcp.routers.postgres.service=postgres"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d certs"]
       interval: 10s
@@ -27,8 +32,10 @@ services:
       MANDRILL_API_KEY: $MANDRILL_API_KEY
       SENDGRID_API_KEY: $SENDGRID_API_KEY
       HOSTNAME: admin.127.0.0.1.xip.io
-      VIRTUAL_HOST: admin.127.0.0.1.xip.io
       CAS_SERVER_URL: https://casserver.herokuapp.com/cas/
+    labels:
+      - "traefik.http.routers.bcadmin.rule=Host(`admin.127.0.0.1.xip.io`)"
+      - "traefik.http.routers.bcadmin.tls=true"
     volumes:
       - .:/code
     expose:
@@ -37,14 +44,16 @@ services:
       db:
         condition: service_healthy
 
-  nginx-proxy:
-    image: jwilder/nginx-proxy
+  reverse-proxy:
+    image: traefik:v2.0
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - $HOME/certs:/etc/nginx/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - $HOME/certs:/data/traefik:ro
+      - ./traefik:/etc/traefik:ro
 
   bitcoind:
     image: seegno/bitcoind:0.13-alpine
@@ -64,7 +73,6 @@ services:
   cert-issuer:
     image: stuartfreeman/blockcerts-issuer
     environment:
-      VIRTUAL_HOST: cert-issuer.127.0.0.1.xip.io
       PRIVKEY: cUiqhQJ4SKmwsCGVA6sJqGiFYifyhXbk3nu7Wv8eQxfVR1kZ3u8D
       ISSUING_ADDRESS: myTiVfMp9ygfQSmpKf9WUrTAewz8ebqMsr
       USB_NAME: /etc/cert-issuer/
@@ -73,6 +81,9 @@ services:
       CHAIN: bitcoin_regtest
       BITCOIND: "True"
     command: /bin/bash -c "mkdir -p ~/.bitcoin; echo $$PRIVKEY > $$USB_NAME/$$KEY_FILE && echo -e rpcpassword=makeitrain\\\\nrpcconnect=blockcerts-admin-app_bitcoind_1\\\\nrpcport=18332 > ~/.bitcoin/bitcoin.conf && /start.sh"
+    labels:
+      - "traefik.http.routers.certissuer.rule=Host(`cert-issuer.127.0.0.1.xip.io`)"
+      - "traefik.http.routers.certissuer.tls=true"
     expose:
       - 80
     networks:

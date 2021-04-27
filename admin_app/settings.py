@@ -36,7 +36,7 @@ DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = [os.getenv('HOSTNAME', '0.0.0.0')]
 
-USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_HOST = os.getenv('USE_X_FORWARDED_HOST', False)
 
 # Application definition
 

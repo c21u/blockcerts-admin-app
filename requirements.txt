@@ -8,4 +8,4 @@ django-bootstrap-datepicker-plus>=3.0.5
 django-cas-ng>=3.6.0
 django-s3-storage>=0.12.5
 sentry-sdk>=0.11.2
-requests>=2.22.0
+requests==2.20.0
