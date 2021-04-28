@@ -31,8 +31,9 @@ services:
       DEBUG: "True"
       MANDRILL_API_KEY: $MANDRILL_API_KEY
       SENDGRID_API_KEY: $SENDGRID_API_KEY
-      HOSTNAME: admin.127.0.0.1.xip.io
+      ALLOWED_HOSTNAME: admin.127.0.0.1.xip.io
       CAS_SERVER_URL: https://casserver.herokuapp.com/cas/
+      USE_X_FORWARDED_HOST: "True"
     labels:
       - "traefik.http.routers.bcadmin.rule=Host(`admin.127.0.0.1.xip.io`)"
       - "traefik.http.routers.bcadmin.tls=true"
